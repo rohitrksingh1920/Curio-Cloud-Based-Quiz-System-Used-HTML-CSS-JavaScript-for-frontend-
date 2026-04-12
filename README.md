@@ -3,7 +3,7 @@
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 cloud_quiz_production/
@@ -49,7 +49,7 @@ cloud_quiz_production/
 
 ---
 
-## 🗺️ Architecture
+## Architecture
 
 ```
 Internet
@@ -66,7 +66,7 @@ Nginx :80
 
 ---
 
-## 🚀 Option A — AWS EC2 Deployment (Production)
+## Option A — AWS EC2 Deployment (Production)
 
 ### Step 1: Launch EC2 Instance
 
@@ -176,7 +176,7 @@ sudo systemctl restart cloudquiz
 
 ---
 
-## 🐳 Option B — Local Development with Docker Compose
+##  Option B — Local Development with Docker Compose
 
 ### Prerequisites
 - Docker Desktop installed
@@ -212,7 +212,7 @@ docker compose logs -f db         # PostgreSQL logs
 
 ---
 
-## 🗄️ Database (PostgreSQL)
+## Database (PostgreSQL)
 
 ### Connection details (after deploy)
 ```
@@ -268,7 +268,7 @@ JOIN quizzes q ON q.id = a.quiz_id;
 
 ---
 
-## 🔄 Updating the Application
+## Updating the Application
 
 Every time you push new code:
 
@@ -291,7 +291,7 @@ cd ~/cloud_quiz && git pull origin main
 
 ---
 
-## 💾 Backups
+## Backups
 
 ### Run a manual backup
 ```bash
@@ -317,17 +317,17 @@ psql postgresql://cloudquiz:PASSWORD@localhost:5432/cloudquiz \
 
 ---
 
-## 🔑 Demo Accounts (after seeding)
+## Demo Accounts (after seeding)
 
 | Role    | Email                | Password    |
 |---------|----------------------|-------------|
 | Admin   | admin@projexi.com    | admin1234   |
-| Teacher | piyush@example.com   | piyush1234  |
+| Teacher | rohitrk.singh1920@gmail.com   | rohit1234  |
 | Student | alice@example.com    | student123  |
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 | Method | Endpoint                                | Auth | Description                   |
 |--------|-----------------------------------------|------|-------------------------------|
@@ -358,7 +358,7 @@ psql postgresql://cloudquiz:PASSWORD@localhost:5432/cloudquiz \
 
 ---
 
-## 🛠️ Useful Commands (EC2)
+## Useful Commands (EC2)
 
 ```bash
 # Application
@@ -395,7 +395,7 @@ du -sh ~/cloud_quiz/backups/            # Backup folder size
 
 ---
 
-## ❌ Troubleshooting
+## Troubleshooting
 
 ### "502 Bad Gateway"
 ```bash
@@ -442,7 +442,7 @@ sudo nginx -T    # prints full merged config
 
 ---
 
-## 🔒 Production Hardening Checklist
+## Production Hardening Checklist
 
 - [ ] **Change SECRET_KEY** — generate with `python -c "import secrets; print(secrets.token_hex(32))"`
 - [ ] **Set DEBUG=false** in `.env` — hides `/docs` and `/redoc`
@@ -466,7 +466,7 @@ sudo nginx -T    # prints full merged config
 
 ---
 
-## 🔁 Moving to Amazon RDS (Optional)
+## Moving to Amazon RDS (Optional)
 
 To use RDS instead of the local PostgreSQL:
 
