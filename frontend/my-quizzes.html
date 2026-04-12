@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curio - My Quizzes</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+      }
+      .page-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .page-header p {
+        font-size: 14px;
+        color: var(--text-light);
+      }
+
+      .filter-bar {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .filter-search {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+      }
+      .filter-search i {
+        color: var(--text-light);
+        font-size: 18px;
+      }
+      .filter-search input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 14px;
+        font-family: var(--font-family);
+        width: 100%;
+        color: var(--text-dark);
+      }
+      .filter-search input::placeholder {
+        color: var(--text-lighter);
+      }
+      .filter-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .filter-btn {
+        padding: 7px 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background: transparent;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        color: var(--text-dark);
+        font-family: var(--font-family);
+        transition: all 0.2s;
+      }
+      .filter-btn.active,
+      .filter-btn:hover {
+        background: var(--primary-color);
+        color: #fff;
+        border-color: var(--primary-color);
+      }
+
+      .quiz-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .quiz-card {
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .quiz-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+      }
+      .quiz-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .quiz-subject {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-light);
+        letter-spacing: 0.5px;
+      }
+      .quiz-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .quiz-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        line-height: 1.4;
+        color: var(--text-dark);
+      }
+      .quiz-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .quiz-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-light);
+        font-size: 13px;
+      }
+      .quiz-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        border-top: 1px dotted var(--border-color);
+      }
+      .enrolled-avatars {
+        display: flex;
+      }
+      .avatar-placeholder {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+      }
+      .enrolled-text {
+        font-size: 12px;
+        color: var(--text-light);
+        margin-left: 8px;
+      }
+      .btn-outline {
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        background: transparent;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-family: var(--font-family);
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-outline:hover {
+        background: var(--primary-color);
+        color: #fff;
+      }
+      .btn-danger-outline {
+        border: 1px solid var(--danger);
+        color: var(--danger);
+        background: transparent;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-family: var(--font-family);
+        transition: all 0.2s;
+      }
+      .btn-danger-outline:hover {
+        background: var(--danger);
+        color: #fff;
+      }
+
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #f0f0f0 25%,
+          #e0e0e0 50%,
+          #f0f0f0 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: var(--radius-lg);
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      .empty-state {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--text-light);
+      }
+      .empty-state i {
+        font-size: 52px;
+        display: block;
+        margin-bottom: 14px;
+        color: var(--text-lighter);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <i
+              class="ri-cloud-line"
+              style="color: var(--primary-color); font-size: 24px"
+            ></i>
+            Curio
+          </div>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="menu-item"
+            ><i class="ri-dashboard-line"></i> Dashboard</a
+          >
+          <a href="create-quiz.html" class="menu-item"
+            ><i class="ri-add-circle-line"></i> Create Quiz</a
+          >
+          <a href="my-quizzes.html" class="menu-item active"
+            ><i class="ri-list-check-2"></i> My Quizzes</a
+          >
+          <a href="analytics.html" class="menu-item"
+            ><i class="ri-bar-chart-box-line"></i> Analytics</a
+          >
+          <a href="settings.html" class="menu-item"
+            ><i class="ri-settings-3-line"></i> Settings</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-avatar text-white">R</div>
+          <div class="user-info">
+            <div class="user-name">Welcome!</div>
+            <div class="user-role">
+              <i class="ri-logout-box-r-line"></i
+              ><a href="index.html">Logout</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="top-header">
+          <div class="search-bar">
+            <i class="ri-search-line"></i>
+            <input
+              type="text"
+              id="top-search"
+              placeholder="Search quizzes, subjects, or students..."
+            />
+          </div>
+          <div class="header-actions">
+            <button class="notification-btn">
+              <i class="ri-notification-3-line"></i><span class="badge">0</span>
+            </button>
+            <a
+              href="create-quiz.html"
+              class="btn btn-primary d-flex align-center gap-2"
+              ><i class="ri-add-line"></i> Create New Quiz</a
+            >
+          </div>
+        </header>
+
+        <div class="main-scroll-area">
+          <div class="page-header">
+            <div>
+              <h1>My Quizzes</h1>
+              <p>
+                Manage and take quizzes. Completed quizzes show the 🏆
+                leaderboard.
+              </p>
+            </div>
+            <a
+              href="create-quiz.html"
+              class="btn btn-primary d-flex align-center gap-2"
+              ><i class="ri-add-line"></i> Create New Quiz</a
+            >
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-search">
+              <i class="ri-search-line"></i>
+              <input
+                type="text"
+                id="filter-input"
+                placeholder="Filter by title or subject…"
+              />
+            </div>
+            <div class="filter-actions">
+              <button class="filter-btn active" data-status="">All</button>
+              <button class="filter-btn" data-status="active">Active</button>
+              <button class="filter-btn" data-status="upcoming">
+                Upcoming
+              </button>
+              <button class="filter-btn" data-status="completed">
+                Completed
+              </button>
+            </div>
+          </div>
+
+          <div class="quiz-cards" id="quiz-grid">
+            <div class="skeleton" style="height: 220px"></div>
+            <div class="skeleton" style="height: 220px"></div>
+            <div class="skeleton" style="height: 220px"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!initProtectedPage()) return;
+
+        const grid = document.getElementById("quiz-grid");
+        const filterInput = document.getElementById("filter-input");
+        const topSearch = document.getElementById("top-search");
+        let allQuizzes = [];
+        let activeStatus = "";
+        let searchTerm = "";
+
+        // Pre-fill search from URL ?search=
+        const urlSearch =
+          new URLSearchParams(window.location.search).get("search") || "";
+        if (urlSearch) {
+          filterInput.value = urlSearch;
+          searchTerm = urlSearch.toLowerCase();
+        }
+
+        async function loadQuizzes() {
+          grid.innerHTML = `<div class="skeleton" style="height:220px;"></div>
+                          <div class="skeleton" style="height:220px;"></div>
+                          <div class="skeleton" style="height:220px;"></div>`;
+          try {
+            allQuizzes = await QuizAPI.list();
+            renderCards();
+          } catch (e) {
+            grid.innerHTML = `<div class="empty-state"><i class="ri-error-warning-line"></i><p>${e.message}</p></div>`;
+          }
+        }
+
+        function renderCards() {
+          let filtered = allQuizzes;
+          if (activeStatus)
+            filtered = filtered.filter((q) => q.status === activeStatus);
+          if (searchTerm)
+            filtered = filtered.filter(
+              (q) =>
+                q.title.toLowerCase().includes(searchTerm) ||
+                (q.category || "").toLowerCase().includes(searchTerm),
+            );
+
+          if (!filtered.length) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <i class="ri-file-list-3-line"></i>
+                    <h3>No quizzes found</h3>
+                    <p>${searchTerm || activeStatus ? "Try a different filter." : "Create your first quiz!"}</p>
+                    ${!searchTerm && !activeStatus ? '<a href="create-quiz.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;"><i class="ri-add-line"></i> Create Quiz</a>' : ""}
+                </div>`;
+            return;
+          }
+          grid.innerHTML = filtered.map((q) => buildCard(q)).join("");
+          attachCardListeners();
+        }
+
+        function buildCard(quiz) {
+          const colors = ["#61DBFB", "#FFB347", "#CBAACB"];
+          const avatars = colors
+            .map(
+              (c, i) =>
+                `<div class="avatar-placeholder" style="background:${c};margin-left:${i === 0 ? "0" : "-8px"};">${i + 1}</div>`,
+            )
+            .join("");
+          const timeStr = quiz.scheduled_time
+            ? UI.formatTime(quiz.scheduled_time)
+            : "";
+
+          const badgeBg =
+            quiz.status === "active"
+              ? "#e6fff1"
+              : quiz.status === "completed"
+                ? "#f1f2f6"
+                : "#eef2ff";
+          const badgeTc =
+            quiz.status === "active"
+              ? "#2ED573"
+              : quiz.status === "completed"
+                ? "#747d8c"
+                : "var(--primary-color)";
+
+          let footerBtn;
+          if (quiz.is_attempted || quiz.status === "completed") {
+            // ── LEADERBOARD BUTTON on completed quizzes ──────────────────
+            footerBtn = `
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button style="padding:5px 12px;font-size:12px;border:1px solid #ccc;
+                                   color:#999;background:transparent;border-radius:20px;cursor:default;" disabled>
+                        ✅ Done
+                    </button>
+                    <a href="leaderboard.html?id=${quiz.id}" class="btn-outline">
+                        <i class="ri-trophy-line"></i> Board
+                    </a>
+                </div>`;
+          } else if (quiz.status === "upcoming") {
+            footerBtn = `
+                <button style="padding:6px 12px;font-size:13px;opacity:.5;cursor:not-allowed;
+                               border:1px solid var(--border-color);border-radius:20px;
+                               background:transparent;font-family:var(--font-family);" disabled>
+                    Not Started
+                </button>`;
+          } else {
+            footerBtn = `
+                <button class="btn-outline" data-action="take" data-id="${quiz.id}">
+                    Start Quiz
+                </button>`;
+          }
+
+          return `
+        <div class="quiz-card" data-id="${quiz.id}">
+            <div class="quiz-meta">
+                <span class="quiz-subject">${(quiz.category || "").toUpperCase()}</span>
+                <span class="quiz-badge" style="background:${badgeBg};color:${badgeTc};">${quiz.status}</span>
+            </div>
+            <h3 class="quiz-title">${quiz.title}</h3>
+            <div class="quiz-details">
+                ${quiz.scheduled_date ? `<div class="quiz-detail-item"><i class="ri-calendar-line"></i>${quiz.scheduled_date}</div>` : ""}
+                ${timeStr ? `<div class="quiz-detail-item"><i class="ri-time-line"></i>${timeStr} (${quiz.duration_mins} mins)</div>` : `<div class="quiz-detail-item"><i class="ri-time-line"></i>${quiz.duration_mins} mins</div>`}
+                <div class="quiz-detail-item"><i class="ri-award-line"></i>${quiz.total_points} points</div>
+            </div>
+            <div class="quiz-card-footer">
+                <div style="display:flex;align-items:center;">
+                    <div class="enrolled-avatars">${avatars}</div>
+                    <span class="enrolled-text">+${quiz.enrolled_count || 0} enrolled</span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    ${footerBtn}
+                    <button class="btn-danger-outline" data-action="delete" data-id="${quiz.id}" title="Delete">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+        }
+
+        function attachCardListeners() {
+          grid.querySelectorAll('[data-action="take"]').forEach((btn) => {
+            btn.addEventListener("click", () => {
+              window.location.href = `take-quiz.html?id=${btn.dataset.id}`;
+            });
+          });
+          grid.querySelectorAll('[data-action="delete"]').forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              if (!confirm("Delete this quiz? This cannot be undone.")) return;
+              try {
+                await QuizAPI.delete(btn.dataset.id);
+                UI.toast("Quiz deleted.");
+                await loadQuizzes();
+              } catch (e) {
+                UI.toast(e.message, "error");
+              }
+            });
+          });
+        }
+
+        // Filter buttons
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document
+              .querySelectorAll(".filter-btn")
+              .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            activeStatus = btn.dataset.status;
+            renderCards();
+          });
+        });
+
+        // Search filter
+        let debounce;
+        filterInput.addEventListener("input", (e) => {
+          clearTimeout(debounce);
+          debounce = setTimeout(() => {
+            searchTerm = e.target.value.trim().toLowerCase();
+            renderCards();
+          }, 300);
+        });
+
+        // Header search
+        topSearch.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && e.target.value.trim()) {
+            window.location.href = `my-quizzes.html?search=${encodeURIComponent(e.target.value.trim())}`;
+          }
+        });
+
+        await loadQuizzes();
+      });
+    </script>
+  </body>
+</html>

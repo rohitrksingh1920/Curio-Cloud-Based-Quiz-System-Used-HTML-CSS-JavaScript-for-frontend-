@@ -1,0 +1,23 @@
+# Web framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# Database — PostgreSQL
+sqlalchemy==2.0.30
+alembic==1.13.1
+psycopg2-binary==2.9.9          # PostgreSQL adapter
+
+# Auth / Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+
+# Validation / Settings
+pydantic[email]==2.7.1
+pydantic-settings==2.2.1
+
+# HTTP client (tests / health checks)
+httpx==0.27.0
+
+# Production WSGI/ASGI process manager
+gunicorn==22.0.0

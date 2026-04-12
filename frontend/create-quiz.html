@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curio - Create Quiz</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .page-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .breadcrumbs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-light);
+        font-size: 14px;
+      }
+      .breadcrumbs span {
+        color: var(--text-dark);
+        font-weight: 500;
+      }
+      .toolbar-actions {
+        display: flex;
+        gap: 12px;
+      }
+      .create-quiz-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 32px;
+        align-items: start;
+      }
+      .card-header {
+        margin-bottom: 24px;
+      }
+      .card-header h2 {
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+      .card-header p {
+        font-size: 13px;
+        color: var(--text-light);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        color: var(--text-dark);
+      }
+      .questions-header {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 16px;
+      }
+      .question-card {
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        background: #fff;
+        margin-bottom: 24px;
+      }
+      .question-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: #fafbfc;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        font-weight: 600;
+      }
+      .delete-btn {
+        color: var(--text-light);
+        cursor: pointer;
+      }
+      .delete-btn:hover {
+        color: var(--danger);
+      }
+      .question-card-body {
+        padding: 24px;
+      }
+      .question-input {
+        border: none;
+        border-bottom: 2px solid var(--border-color);
+        border-radius: 0;
+        padding: 8px 0;
+        font-size: 16px;
+        background: transparent;
+        margin-bottom: 24px;
+        width: 100%;
+      }
+      .question-input:focus {
+        outline: none;
+        box-shadow: none;
+        border-bottom-color: var(--primary-color);
+        background: transparent;
+      }
+      .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .option-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .radio-btn {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .radio-btn.selected {
+        border-color: var(--primary-color);
+      }
+      .radio-btn.selected::after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        background: var(--primary-color);
+        border-radius: 50%;
+      }
+      .remove-option {
+        color: #a4b0be;
+        cursor: pointer;
+        font-size: 20px;
+      }
+      .remove-option:hover {
+        color: var(--danger);
+      }
+      .add-btn {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .add-btn:hover {
+        color: var(--primary-hover);
+      }
+      .add-question-wrapper {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+      }
+      .correct-label {
+        font-size: 11px;
+        color: var(--success);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <i
+              class="ri-cloud-line"
+              style="color: var(--primary-color); font-size: 24px"
+            ></i>
+            Curio
+          </div>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="menu-item"
+            ><i class="ri-dashboard-line"></i> Dashboard</a
+          >
+          <a href="create-quiz.html" class="menu-item active"
+            ><i class="ri-add-circle-line"></i> Create Quiz</a
+          >
+          <a href="my-quizzes.html" class="menu-item"
+            ><i class="ri-list-check-2"></i> My Quizzes</a
+          >
+          <a href="analytics.html" class="menu-item"
+            ><i class="ri-bar-chart-box-line"></i> Analytics</a
+          >
+          <a href="settings.html" class="menu-item"
+            ><i class="ri-settings-3-line"></i> Settings</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-avatar text-white">AD</div>
+          <div class="user-info">
+            <div class="user-name">Welcome, Admin!</div>
+            <div class="user-role">
+              <i class="ri-logout-box-r-line"></i
+              ><a href="index.html">Logout</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <header class="top-header">
+          <div class="search-bar">
+            <i class="ri-search-line"></i>
+            <input
+              type="text"
+              placeholder="Search quizzes, subjects, or students..."
+            />
+          </div>
+          <div class="header-actions">
+            <button class="notification-btn">
+              <i class="ri-notification-3-line"></i><span class="badge">0</span>
+            </button>
+            <a
+              href="create-quiz.html"
+              class="btn btn-primary d-flex align-center gap-2"
+              ><i class="ri-add-line"></i> Create New Quiz</a
+            >
+          </div>
+        </header>
+
+        <div class="main-scroll-area">
+          <div class="page-toolbar">
+            <div class="breadcrumbs">
+              <a href="dashboard.html">Dashboard</a>
+              <i class="ri-arrow-right-s-line"></i>
+              <span>Create Quiz</span>
+            </div>
+            <div class="toolbar-actions">
+              <a href="my-quizzes.html" class="btn btn-secondary">Cancel</a>
+              <button
+                class="btn btn-primary d-flex align-center gap-2"
+                id="save-btn"
+              >
+                <i class="ri-save-3-line"></i> Save &amp; Publish
+              </button>
+            </div>
+          </div>
+
+          <div class="create-quiz-layout">
+            <!-- Settings Panel -->
+            <div class="card">
+              <div class="card-header">
+                <h2>Quiz Settings</h2>
+                <p>Configure the basic details of your quiz.</p>
+              </div>
+              <div class="form-group">
+                <label>QUIZ TITLE</label>
+                <input
+                  type="text"
+                  id="quiz-title"
+                  placeholder="e.g. React.js Fundamentals"
+                />
+              </div>
+              <div class="form-group">
+                <label>SUBJECT / CATEGORY</label>
+                <select id="quiz-category">
+                  <option value="">Select Category</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="History">History</option>
+                  <option value="Science">Science</option>
+                  <option value="Geography">Geography</option>
+                  <option value="English">English</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>DURATION (MINS)</label>
+                  <input
+                    type="number"
+                    id="quiz-duration"
+                    placeholder="30"
+                    min="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>TOTAL POINTS</label>
+                  <input
+                    type="number"
+                    id="quiz-points"
+                    placeholder="100"
+                    min="1"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>DATE</label>
+                  <input type="date" id="quiz-date" />
+                </div>
+                <div class="form-group">
+                  <label>TIME</label>
+                  <input type="time" id="quiz-time" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Questions Panel -->
+            <div>
+              <h2 class="questions-header">Questions</h2>
+              <div id="questions-container"></div>
+              <div class="add-question-wrapper">
+                <button
+                  type="button"
+                  class="add-btn"
+                  id="add-question-btn"
+                  style="font-size: 15px"
+                >
+                  <i class="ri-add-line"></i> Add New Question
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!initProtectedPage()) return;
+
+        let questionCount = 0;
+
+        function addQuestion() {
+          questionCount++;
+          const qId = `q-${questionCount}`;
+          const card = document.createElement("div");
+          card.className = "question-card";
+          card.dataset.qid = qId;
+          card.innerHTML = `
+            <div class="question-card-header">
+                Question ${questionCount}
+                <i class="ri-delete-bin-line delete-btn" title="Delete question"></i>
+            </div>
+            <div class="question-card-body">
+                <input type="text" class="question-input" placeholder="Type your question here...">
+                <div class="options-list"></div>
+                <button type="button" class="add-btn add-option-btn">
+                    <i class="ri-add-line"></i> Add Option
+                </button>
+            </div>`;
+
+          // Delete question
+          card.querySelector(".delete-btn").addEventListener("click", () => {
+            if (document.querySelectorAll(".question-card").length === 1) {
+              UI.toast("A quiz must have at least one question.", "error");
+              return;
+            }
+            if (confirm("Delete this question?")) {
+              card.remove();
+              renumberQuestions();
+            }
+          });
+
+          // Add option
+          card
+            .querySelector(".add-option-btn")
+            .addEventListener("click", () => {
+              addOption(card.querySelector(".options-list"));
+            });
+
+          document.getElementById("questions-container").appendChild(card);
+
+          // Add two default options
+          addOption(card.querySelector(".options-list"), true); // first = correct
+          addOption(card.querySelector(".options-list"), false);
+        }
+
+        function addOption(list, isCorrectDefault = false) {
+          const item = document.createElement("div");
+          item.className = "option-item";
+          const count = list.children.length + 1;
+          item.innerHTML = `
+            <div class="radio-btn ${isCorrectDefault && list.children.length === 0 ? "selected" : ""}"></div>
+            <input type="text" placeholder="Option ${count}" style="flex:1;">
+            <span class="correct-label" style="display:${isCorrectDefault && list.children.length === 0 ? "block" : "none"}">✓ Correct</span>
+            <i class="ri-close-line remove-option" title="Remove option"></i>`;
+
+          item.querySelector(".radio-btn").addEventListener("click", () => {
+            // Deselect all in this list
+            list
+              .querySelectorAll(".radio-btn")
+              .forEach((r) => r.classList.remove("selected"));
+            list
+              .querySelectorAll(".correct-label")
+              .forEach((l) => (l.style.display = "none"));
+            item.querySelector(".radio-btn").classList.add("selected");
+            item.querySelector(".correct-label").style.display = "block";
+          });
+
+          item.querySelector(".remove-option").addEventListener("click", () => {
+            if (list.children.length <= 2) {
+              UI.toast("Each question needs at least 2 options.", "error");
+              return;
+            }
+            item.remove();
+          });
+
+          list.appendChild(item);
+        }
+
+        function renumberQuestions() {
+          document.querySelectorAll(".question-card").forEach((card, i) => {
+            card.querySelector(
+              ".question-card-header",
+            ).childNodes[0].textContent = `Question ${i + 1} `;
+          });
+          questionCount = document.querySelectorAll(".question-card").length;
+        }
+
+        function collectPayload() {
+          const title = document.getElementById("quiz-title").value.trim();
+          const category = document.getElementById("quiz-category").value;
+          const duration =
+            parseInt(document.getElementById("quiz-duration").value) || 30;
+          const points =
+            parseInt(document.getElementById("quiz-points").value) || 100;
+          const date = document.getElementById("quiz-date").value;
+          const time = document.getElementById("quiz-time").value;
+
+          if (!title) throw new Error("Quiz title is required.");
+          if (!category) throw new Error("Please select a category.");
+
+          const questions = [];
+          let qError = null;
+
+          document.querySelectorAll(".question-card").forEach((card, qi) => {
+            if (qError) return;
+            const text = card.querySelector(".question-input").value.trim();
+            if (!text) {
+              qError = `Question ${qi + 1} text is empty.`;
+              return;
+            }
+
+            const options = [];
+            let hasCorrect = false;
+            card.querySelectorAll(".option-item").forEach((item, oi) => {
+              const optText = item
+                .querySelector('input[type="text"]')
+                .value.trim();
+              const isCorrect = item
+                .querySelector(".radio-btn")
+                .classList.contains("selected");
+              if (!optText) {
+                qError = `Question ${qi + 1}: Option ${oi + 1} text is empty.`;
+                return;
+              }
+              if (isCorrect) hasCorrect = true;
+              options.push({
+                text: optText,
+                is_correct: isCorrect,
+                order: oi + 1,
+              });
+            });
+            if (!hasCorrect) {
+              qError = `Question ${qi + 1}: Please mark one correct answer.`;
+              return;
+            }
+
+            questions.push({ text, order: qi + 1, options });
+          });
+
+          if (qError) throw new Error(qError);
+          if (questions.length === 0)
+            throw new Error("Add at least one question.");
+
+          const payload = {
+            title,
+            category,
+            duration_mins: duration,
+            total_points: points,
+            questions,
+          };
+          if (date) payload.scheduled_date = date;
+          if (time) payload.scheduled_time = time + ":00";
+          return payload;
+        }
+
+        document
+          .getElementById("add-question-btn")
+          .addEventListener("click", addQuestion);
+
+        document
+          .getElementById("save-btn")
+          .addEventListener("click", async () => {
+            const btn = document.getElementById("save-btn");
+            let payload;
+            try {
+              payload = collectPayload();
+            } catch (e) {
+              UI.toast(e.message, "error");
+              return;
+            }
+            UI.setLoading(btn, true);
+            try {
+              await QuizAPI.create(payload);
+              UI.toast("Quiz published successfully!");
+              setTimeout(
+                () => (window.location.href = "my-quizzes.html"),
+                1200,
+              );
+            } catch (e) {
+              UI.toast(e.message, "error");
+            } finally {
+              UI.setLoading(btn, false);
+            }
+          });
+
+        // Init with one question
+        addQuestion();
+      });
+    </script>
+  </body>
+</html>

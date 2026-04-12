@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curio - Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .stat-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 24px;
+        border-radius: var(--radius-lg);
+      }
+      .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+      }
+      .stat-icon.blue {
+        background: #eef2ff;
+        color: var(--primary-color);
+      }
+      .stat-icon.green {
+        background: #e6fff1;
+        color: var(--success);
+      }
+      .stat-icon.purple {
+        background: #f8f0ff;
+        color: #a55eea;
+      }
+      .stat-info h3 {
+        font-size: 14px;
+        color: var(--text-light);
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+      .stat-info .value {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text-dark);
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .section-header h2 {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .section-header a {
+        font-size: 14px;
+      }
+
+      /* ── Quiz cards ─────────────────────────────────── */
+      .quiz-cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      .quiz-card {
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        background: #fff;
+        border: 1px solid var(--border-color);
+      }
+      .quiz-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+      }
+      .quiz-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .quiz-subject {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-light);
+        letter-spacing: 0.5px;
+      }
+
+      /* Status badge variants */
+      .quiz-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .quiz-badge.upcoming {
+        background: #eef2ff;
+        color: var(--primary-color);
+      }
+      .quiz-badge.active {
+        background: #e6fff1;
+        color: #2ed573;
+      }
+      .quiz-badge.completed {
+        background: #f1f2f6;
+        color: #747d8c;
+      }
+
+      .quiz-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        line-height: 1.4;
+      }
+      .quiz-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 24px;
+      }
+      .quiz-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-light);
+        font-size: 13px;
+      }
+      .quiz-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        border-top: 1px dotted var(--border-color);
+      }
+
+      .enrolled-avatars {
+        display: flex;
+      }
+      .avatar-placeholder {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .enrolled-text {
+        font-size: 12px;
+        color: var(--text-light);
+        margin-left: 8px;
+      }
+
+      .btn-outline {
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+        background: transparent;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 14px;
+        font-size: 13px;
+      }
+      .btn-outline:hover {
+        background: var(--primary-color);
+        color: #fff;
+      }
+      .btn-completed {
+        border: 1px solid #ccc;
+        color: #999;
+        background: transparent;
+        border-radius: 20px;
+        font-weight: 600;
+        padding: 6px 14px;
+        font-size: 13px;
+        cursor: default;
+      }
+
+      /* Active section spacing */
+      .active-section-header {
+        margin-top: 40px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .page-header {
+        margin-bottom: 32px;
+      }
+      .page-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      /* Skeletons */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #f0f0f0 25%,
+          #e0e0e0 50%,
+          #f0f0f0 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: var(--text-light);
+      }
+      .empty-state i {
+        font-size: 48px;
+        margin-bottom: 12px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <i
+              class="ri-cloud-line"
+              style="color: var(--primary-color); font-size: 24px"
+            ></i>
+            Curio
+          </div>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="menu-item active"
+            ><i class="ri-dashboard-line"></i> Dashboard</a
+          >
+          <a href="create-quiz.html" class="menu-item"
+            ><i class="ri-add-circle-line"></i> Create Quiz</a
+          >
+          <a href="my-quizzes.html" class="menu-item"
+            ><i class="ri-list-check-2"></i> My Quizzes</a
+          >
+          <a href="analytics.html" class="menu-item"
+            ><i class="ri-bar-chart-box-line"></i> Analytics</a
+          >
+          <a href="settings.html" class="menu-item"
+            ><i class="ri-settings-3-line"></i> Settings</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-avatar text-white">AD</div>
+          <div class="user-info">
+            <div class="user-name">Welcome, Admin!</div>
+            <div class="user-role">
+              <i class="ri-logout-box-r-line"></i>
+              <a href="index.html">Logout</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main-content">
+        <header class="top-header">
+          <div class="search-bar">
+            <i class="ri-search-line"></i>
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search quizzes, subjects, or students..."
+            />
+          </div>
+          <div class="header-actions">
+            <button class="notification-btn">
+              <i class="ri-notification-3-line"></i>
+              <span class="badge">0</span>
+            </button>
+            <a
+              href="create-quiz.html"
+              class="btn btn-primary d-flex align-center gap-2"
+            >
+              <i class="ri-add-line"></i> Create New Quiz
+            </a>
+          </div>
+        </header>
+
+        <div class="main-scroll-area">
+          <div class="page-header">
+            <h1 id="welcome-heading">Welcome to your Dashboard 👋</h1>
+            <p>Here's what's happening with your quizzes today.</p>
+          </div>
+
+          <!-- Stat Cards -->
+          <div class="stat-cards">
+            <div class="card stat-card">
+              <div class="stat-icon blue">
+                <i class="ri-file-list-3-line"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Total Quizzes</h3>
+                <div class="value" id="stat-quizzes">—</div>
+              </div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon green"><i class="ri-group-line"></i></div>
+              <div class="stat-info">
+                <h3>Total Participants</h3>
+                <div class="value" id="stat-participants">—</div>
+              </div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-icon purple"><i class="ri-star-line"></i></div>
+              <div class="stat-info">
+                <h3>Avg. Score</h3>
+                <div class="value" id="stat-avg">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming Quizzes -->
+          <div class="section-header">
+            <h2>Upcoming Quizzes</h2>
+            <a href="my-quizzes.html">View All</a>
+          </div>
+          <div class="quiz-cards" id="quiz-cards-container">
+            <div class="skeleton" style="height: 200px"></div>
+            <div class="skeleton" style="height: 200px"></div>
+            <div class="skeleton" style="height: 200px"></div>
+          </div>
+
+          <!-- Active Quizzes -->
+          <h2 class="active-section-header">Active Quizzes</h2>
+          <div class="quiz-cards" id="active-quizzes">
+            <div class="skeleton" style="height: 160px"></div>
+            <div class="skeleton" style="height: 160px"></div>
+            <div class="skeleton" style="height: 160px"></div>
+          </div>
+        </div>
+        <!-- /main-scroll-area -->
+      </main>
+    </div>
+    <!-- /app-container -->
+
+    <script src="api.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!initProtectedPage()) return;
+
+        const user = Auth.getUser();
+        if (user) {
+          document.getElementById("welcome-heading").textContent =
+            `Welcome ${user.full_name.split(" ")[0]} to your Dashboard 👋`;
+        }
+
+        // ── Stats ──────────────────────────────────────────
+        try {
+          const stats = await DashboardAPI.getStats();
+          document.getElementById("stat-quizzes").textContent =
+            stats.total_quizzes.toLocaleString();
+          document.getElementById("stat-participants").textContent =
+            stats.total_participants.toLocaleString();
+          document.getElementById("stat-avg").textContent =
+            stats.avg_score + "%";
+        } catch (e) {
+          console.error("Stats error:", e);
+        }
+
+        // ── Upcoming + Active quizzes ───────────────────────
+        const upcomingContainer = document.getElementById(
+          "quiz-cards-container",
+        );
+        const activeContainer = document.getElementById("active-quizzes");
+
+        try {
+          const [upcoming, active] = await Promise.all([
+            DashboardAPI.getUpcomingQuizzes(6),
+            DashboardAPI.getActiveQuizzes(),
+          ]);
+
+          // Upcoming section
+          if (upcoming.length === 0) {
+            upcomingContainer.innerHTML = `
+              <div class="empty-state" style="grid-column:1/-1;">
+                <i class="ri-calendar-check-line"></i>
+                <p>No upcoming quizzes. <a href="create-quiz.html">Schedule one!</a></p>
+              </div>`;
+          } else {
+            upcomingContainer.innerHTML = upcoming
+              .map((q) => buildCard(q))
+              .join("");
+          }
+
+          // Active section
+          if (active.length === 0) {
+            activeContainer.innerHTML = `
+              <div class="empty-state" style="grid-column:1/-1;">
+                <i class="ri-play-circle-line"></i>
+                <p>No active quizzes right now.</p>
+              </div>`;
+          } else {
+            activeContainer.innerHTML = active
+              .map((q) => buildActiveCard(q))
+              .join("");
+          }
+        } catch (e) {
+          console.error("Quiz load error:", e);
+          upcomingContainer.innerHTML = `<p style="color:var(--danger);grid-column:1/-1;">Failed to load quizzes: ${e.message}</p>`;
+          activeContainer.innerHTML = "";
+        }
+
+        // Search bar
+        document
+          .getElementById("search-input")
+          .addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && e.target.value.trim()) {
+              window.location.href = `my-quizzes.html?search=${encodeURIComponent(e.target.value.trim())}`;
+            }
+          });
+      });
+
+      /* ── Card builders ─────────────────────────────────── */
+
+      function badgeClass(status) {
+        if (status === "upcoming") return "upcoming";
+        if (status === "active") return "active";
+        if (status === "completed") return "completed";
+        return "upcoming";
+      }
+
+      function buildCard(quiz) {
+        const colors = ["#61DBFB", "#FFB347", "#CBAACB"];
+        const avatars = colors
+          .map(
+            (c, i) =>
+              `<div class="avatar-placeholder" style="background:${c};color:#fff;margin-left:${i === 0 ? "0" : "-8px"}">${i + 1}</div>`,
+          )
+          .join("");
+        const timeStr = quiz.scheduled_time
+          ? UI.formatTime(quiz.scheduled_time)
+          : "";
+        const bc = badgeClass(quiz.status);
+
+        const footerBtn = quiz.is_attempted
+          ? `<button class="btn-completed" disabled>Completed ✅</button>`
+          : `<button class="btn-outline" onclick="window.location.href='take-quiz.html?id=${quiz.id}'">Start Quiz</button>`;
+
+        return `
+          <div class="quiz-card">
+            <div class="quiz-meta">
+              <span class="quiz-subject">${(quiz.category || "").toUpperCase()}</span>
+              <span class="quiz-badge ${bc}">${quiz.status}</span>
+            </div>
+            <h3 class="quiz-title">${quiz.title}</h3>
+            <div class="quiz-details">
+              ${quiz.scheduled_date ? `<div class="quiz-detail-item"><i class="ri-calendar-line"></i>${quiz.scheduled_date}</div>` : ""}
+              ${timeStr ? `<div class="quiz-detail-item"><i class="ri-time-line"></i>${timeStr} (${quiz.duration_mins} Mins)</div>` : ""}
+            </div>
+            <div class="quiz-card-footer">
+              <div class="enrolled-users">
+                <div class="enrolled-avatars" style="display:flex;">${avatars}</div>
+                <span class="enrolled-text">+${quiz.enrolled_count || 0} enrolled</span>
+              </div>
+              ${footerBtn}
+            </div>
+          </div>`;
+      }
+
+      function buildActiveCard(quiz) {
+        /* Active cards are simpler — no date, just duration + start button */
+        return `
+          <div class="quiz-card">
+            <div class="quiz-meta">
+              <span class="quiz-subject">${(quiz.category || "").toUpperCase()}</span>
+              <span class="quiz-badge active">active</span>
+            </div>
+            <h3 class="quiz-title">${quiz.title}</h3>
+            <div class="quiz-details">
+              <div class="quiz-detail-item"><i class="ri-time-line"></i>${quiz.duration_mins} mins</div>
+              <div class="quiz-detail-item"><i class="ri-award-line"></i>${quiz.total_points} points</div>
+            </div>
+            <div class="quiz-card-footer">
+              <span class="enrolled-text">+${quiz.enrolled_count || 0} enrolled</span>
+              <button class="btn-outline" onclick="window.location.href='take-quiz.html?id=${quiz.id}'">
+                Start Quiz
+              </button>
+            </div>
+          </div>`;
+      }
+    </script>
+  </body>
+</html>

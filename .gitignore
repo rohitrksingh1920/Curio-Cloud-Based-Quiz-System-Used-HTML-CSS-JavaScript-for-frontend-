@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Environment — NEVER commit this
+backend/.env
+.env
+
+# Database files (SQLite dev only)
+*.db
+*.sqlite3
+
+# Alembic versions (commit these to track migrations)
+# alembic/versions/
+
+# Logs
+*.log
+/var/log/
+
+# Backups
+backups/
+*.sql.gz
+*.sql
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Node (if you ever add a JS build step)
+node_modules/

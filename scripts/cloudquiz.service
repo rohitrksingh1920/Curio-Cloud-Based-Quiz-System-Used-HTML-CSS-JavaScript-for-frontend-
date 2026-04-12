@@ -1,0 +1,55 @@
+# /etc/systemd/system/cloudquiz.service
+#
+# Manages the Cloud Quiz FastAPI/Gunicorn process.
+# Commands:
+#   sudo systemctl start   cloudquiz
+#   sudo systemctl stop    cloudquiz
+#   sudo systemctl restart cloudquiz
+#   sudo systemctl status  cloudquiz
+#   sudo journalctl -u cloudquiz -f          # live logs
+# ─────────────────────────────────────────────────────────────
+
+[Unit]
+Description=Cloud Quiz FastAPI Application
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=notify
+
+# Run as the ubuntu user (not root)
+User=ubuntu
+Group=ubuntu
+
+# Working directory — adjust if you deploy elsewhere
+WorkingDirectory=/home/ubuntu/cloud_quiz/backend
+
+# Load .env automatically
+EnvironmentFile=/home/ubuntu/cloud_quiz/backend/.env
+
+# Gunicorn with Uvicorn workers
+#   -w 2  →  2 × (2 × CPU cores + 1) is a common starting point
+#            For a t3.micro (1 vCPU) use -w 2
+#            For a t3.small/medium (2 vCPU) use -w 4
+ExecStart=/home/ubuntu/cloud_quiz/venv/bin/gunicorn app.main:app \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --workers 2 \
+    --bind 127.0.0.1:8000 \
+    --timeout 120 \
+    --keep-alive 5 \
+    --log-level info \
+    --access-logfile /var/log/cloudquiz/access.log \
+    --error-logfile  /var/log/cloudquiz/error.log
+
+# Graceful reload on SIGHUP (used by systemctl reload)
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# File descriptor limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

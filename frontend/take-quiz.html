@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curio - Take Quiz</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        background: var(--bg-color);
+      }
+      .quiz-header {
+        background: #fff;
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .quiz-header-left h2 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      .quiz-header-left p {
+        font-size: 13px;
+        color: var(--text-light);
+      }
+      .timer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+      .timer.warning {
+        color: var(--danger);
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .quiz-body {
+        max-width: 760px;
+        margin: 32px auto;
+        padding: 0 24px;
+      }
+      .progress-bar-wrap {
+        margin-bottom: 32px;
+      }
+      .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: var(--text-light);
+        margin-bottom: 8px;
+      }
+      .progress-bar {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 8px;
+        transition: width 0.4s ease;
+      }
+      .question-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 24px;
+      }
+      .question-number {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--primary-color);
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+      }
+      .question-text {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 28px;
+        line-height: 1.5;
+      }
+      .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .option-btn {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fff;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+        font-size: 15px;
+      }
+      .option-btn:hover {
+        border-color: var(--primary-color);
+        background: #eef2ff;
+      }
+      .option-btn.selected {
+        border-color: var(--primary-color);
+        background: #eef2ff;
+      }
+      .option-letter {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+        color: var(--text-light);
+        transition: all 0.2s;
+      }
+      .option-btn.selected .option-letter {
+        background: var(--primary-color);
+        color: #fff;
+        border-color: var(--primary-color);
+      }
+      .nav-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 16px;
+      }
+      /* Result screen */
+      .result-screen {
+        max-width: 600px;
+        margin: 60px auto;
+        text-align: center;
+        padding: 0 24px;
+      }
+      .result-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        margin: 0 auto 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+      }
+      .result-icon.pass {
+        background: #e6fff1;
+        color: #2ed573;
+      }
+      .result-icon.fail {
+        background: #fff0f0;
+        color: #ff4757;
+      }
+      .result-score {
+        font-size: 64px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      .result-label {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .result-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin: 32px 0;
+      }
+      .result-stat {
+        background: #fff;
+        border-radius: var(--radius-md);
+        padding: 20px;
+        border: 1px solid var(--border-color);
+      }
+      .result-stat .val {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .result-stat .lbl {
+        font-size: 12px;
+        color: var(--text-light);
+      }
+      .result-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container" style="display: none">
+      <!-- Quiz Header -->
+      <div class="quiz-header">
+        <div class="quiz-header-left">
+          <h2 id="quiz-title-display">Loading…</h2>
+          <p id="quiz-meta-display"></p>
+        </div>
+        <div class="timer" id="timer">
+          <i class="ri-time-line"></i> <span id="timer-display">--:--</span>
+        </div>
+      </div>
+
+      <!-- Quiz Body -->
+      <div class="quiz-body">
+        <div class="progress-bar-wrap">
+          <div class="progress-text">
+            <span id="progress-label">Question 1 of ?</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              id="progress-fill"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="question-number" id="q-number">QUESTION 1</div>
+          <div class="question-text" id="q-text">Loading…</div>
+          <div class="options-list" id="options-list"></div>
+        </div>
+
+        <div class="nav-actions">
+          <button class="btn btn-secondary" id="prev-btn" disabled>
+            <i class="ri-arrow-left-line"></i> Previous
+          </button>
+          <button class="btn btn-primary" id="next-btn">
+            Next <i class="ri-arrow-right-line"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result screen (hidden until submit) -->
+    <div id="result-screen" style="display: none">
+      <div class="quiz-header">
+        <div class="quiz-header-left">
+          <h2>Quiz Completed!</h2>
+          <p id="result-quiz-name"></p>
+        </div>
+        <a href="my-quizzes.html" class="btn btn-secondary">Back to Quizzes</a>
+      </div>
+      <div class="result-screen">
+        <div class="result-icon" id="result-icon"></div>
+        <div class="result-score" id="result-score"></div>
+        <div class="result-label" id="result-label"></div>
+        <div class="result-stats">
+          <div class="result-stat">
+            <div class="val" id="rs-correct"></div>
+            <div class="lbl">Correct</div>
+          </div>
+          <div class="result-stat">
+            <div class="val" id="rs-total"></div>
+            <div class="lbl">Questions</div>
+          </div>
+          <div class="result-stat">
+            <div class="val" id="rs-points"></div>
+            <div class="lbl">Points Scored</div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <a href="analytics.html" class="btn btn-primary"
+            ><i class="ri-bar-chart-line"></i> View Analytics</a
+          >
+          <a href="my-quizzes.html" class="btn btn-secondary"
+            >Back to Quizzes</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <div id="loading-screen" style="text-align: center; padding: 80px 24px">
+      <i
+        class="ri-loader-4-line"
+        style="
+          font-size: 48px;
+          color: var(--primary-color);
+          animation: spin 1s linear infinite;
+          display: inline-block;
+        "
+      ></i>
+      <p style="margin-top: 16px; color: var(--text-light)">Loading quiz…</p>
+      <style>
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!Auth.requireAuth()) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const quizId = params.get("id");
+        if (!quizId) {
+          window.location.href = "my-quizzes.html";
+          return;
+        }
+
+        let quiz,
+          currentQ = 0,
+          answers = {},
+          timerInterval;
+        let isSubmitted = false; // To prevent multiple submissions
+
+        try {
+          quiz = await QuizAPI.take(quizId);
+        } catch (e) {
+          // If already completed, show friendly message with link
+          const msg = e.message || "Unable to load quiz";
+          const isCompleted =
+            msg.toLowerCase().includes("already completed") ||
+            msg.toLowerCase().includes("already have");
+          document.getElementById("loading-screen").innerHTML =
+            `<div style="text-align:center;padding:60px 24px;">
+                <i class="ri-${isCompleted ? "checkbox-circle" : "error-warning"}-line" style="font-size:56px;color:${isCompleted ? "#2ED573" : "var(--danger)"};display:block;margin-bottom:16px;"></i>
+                <p style="font-size:18px;font-weight:600;margin-bottom:8px;">${isCompleted ? "Already Completed" : "Cannot Load Quiz"}</p>
+                <p style="color:var(--text-light);margin-bottom:24px;">${msg}</p>
+                <a href="my-quizzes.html" class="btn btn-primary">Back to My Quizzes</a>
+            </div>`;
+          return;
+        }
+
+        document.getElementById("loading-screen").style.display = "none";
+        document.getElementById("quiz-container").style.display = "block";
+
+        // Header
+        document.getElementById("quiz-title-display").textContent = quiz.title;
+        document.getElementById("quiz-meta-display").textContent =
+          `${quiz.category} • ${quiz.questions.length} questions • ${quiz.duration_mins} mins`;
+
+        // Timer
+        let remaining = quiz.duration_mins * 60;
+        function updateTimer() {
+          const m = String(Math.floor(remaining / 60)).padStart(2, "0");
+          const s = String(remaining % 60).padStart(2, "0");
+          document.getElementById("timer-display").textContent = `${m}:${s}`;
+          const timerEl = document.getElementById("timer");
+          if (remaining <= 60) timerEl.classList.add("warning");
+          else timerEl.classList.remove("warning");
+
+          if (remaining <= 0) {
+            clearInterval(timerInterval);
+
+            alert("Time's up! Submitting quiz automatically.");
+
+            document.getElementById("next-btn").disabled = true;
+            document.getElementById("prev-btn").disabled = true;
+
+            submitQuiz();
+            return; //Stop execution
+          }
+          remaining--;
+        }
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+
+        function renderQuestion() {
+          const q = quiz.questions[currentQ];
+          const tot = quiz.questions.length;
+          const pct = Math.round(((currentQ + 1) / tot) * 100);
+
+          document.getElementById("q-number").textContent =
+            `QUESTION ${currentQ + 1} OF ${tot}`;
+          document.getElementById("q-text").textContent = q.text;
+          document.getElementById("progress-label").textContent =
+            `Question ${currentQ + 1} of ${tot}`;
+          document.getElementById("progress-pct").textContent = pct + "%";
+          document.getElementById("progress-fill").style.width = pct + "%";
+
+          document.getElementById("prev-btn").disabled = currentQ === 0;
+          document.getElementById("next-btn").innerHTML =
+            currentQ === tot - 1
+              ? '<i class="ri-check-line"></i> Submit Quiz'
+              : 'Next <i class="ri-arrow-right-line"></i>';
+
+          const letters = ["A", "B", "C", "D", "E"];
+          document.getElementById("options-list").innerHTML = q.options
+            .map(
+              (opt, i) =>
+                `<button class="option-btn ${answers[q.id] === opt.id ? "selected" : ""}"
+                data-qid="${q.id}" data-oid="${opt.id}">
+                <span class="option-letter">${letters[i]}</span>
+                <span>${opt.text}</span>
+             </button>`,
+            )
+            .join("");
+
+          document.querySelectorAll(".option-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              answers[btn.dataset.qid] = parseInt(btn.dataset.oid);
+              document
+                .querySelectorAll(".option-btn")
+                .forEach((b) => b.classList.remove("selected"));
+              btn.classList.add("selected");
+            });
+          });
+        }
+
+        document.getElementById("prev-btn").addEventListener("click", () => {
+          if (currentQ > 0) {
+            currentQ--;
+            renderQuestion();
+          }
+        });
+
+        document.getElementById("next-btn").addEventListener("click", () => {
+          const q = quiz.questions[currentQ];
+          if (!answers[q.id]) {
+            UI.toast("Please select an answer before continuing.", "error");
+            return;
+          }
+          if (currentQ < quiz.questions.length - 1) {
+            currentQ++;
+            renderQuestion();
+          } else {
+            if (confirm("Submit the quiz now?")) submitQuiz();
+          }
+        });
+
+        async function submitQuiz() {
+          if (isSubmitted) return; // Prevent multiple calls
+          isSubmitted = true;
+
+          clearInterval(timerInterval);
+          document.getElementById("quiz-container").style.display = "none";
+          document.getElementById("loading-screen").style.display = "block";
+
+          const payload = Object.entries(answers).map(([qid, oid]) => ({
+            question_id: parseInt(qid),
+            selected_option_id: oid,
+          }));
+
+          try {
+            const result = await QuizAPI.submit(quizId, payload);
+            showResult(result);
+          } catch (e) {
+            document.getElementById("loading-screen").innerHTML =
+              `<p style="color:var(--danger);">${e.message}</p>
+                 <a href="my-quizzes.html" class="btn btn-secondary" style="margin-top:16px;">Go Back</a>`;
+          }
+        }
+
+        function showResult(result) {
+          document.getElementById("loading-screen").style.display = "none";
+          document.getElementById("result-screen").style.display = "block";
+
+          document.getElementById("result-quiz-name").textContent =
+            result.quiz_title;
+          document.getElementById("result-score").textContent =
+            result.score_pct + "%";
+          document.getElementById("result-label").textContent = result.passed
+            ? "🎉 Passed!"
+            : "Better luck next time";
+          document.getElementById("rs-correct").textContent =
+            result.correct_count;
+          document.getElementById("rs-total").textContent =
+            result.total_questions;
+          document.getElementById("rs-points").textContent = Math.round(
+            result.score,
+          );
+
+          const iconEl = document.getElementById("result-icon");
+          iconEl.className = "result-icon " + (result.passed ? "pass" : "fail");
+          iconEl.innerHTML = result.passed
+            ? '<i class="ri-trophy-line"></i>'
+            : '<i class="ri-emotion-sad-line"></i>';
+
+          document.getElementById("result-score").style.color = result.passed
+            ? "#2ED573"
+            : "#FF4757";
+        }
+
+        renderQuestion();
+      });
+    </script>
+  </body>
+</html>

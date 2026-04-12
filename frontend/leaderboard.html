@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curio - Leaderboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .lb-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+      }
+      .lb-header-row h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .lb-header-row p {
+        font-size: 14px;
+        color: var(--text-light);
+      }
+
+      /* My rank banner */
+      .my-rank-banner {
+        background: linear-gradient(135deg, var(--primary-color), #403ea0);
+        border-radius: var(--radius-lg);
+        padding: 24px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        color: #fff;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .my-rank-left h3 {
+        font-size: 13px;
+        font-weight: 500;
+        opacity: 0.8;
+        margin-bottom: 4px;
+      }
+      .my-rank-left .num {
+        font-size: 52px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .my-rank-stats {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+      .my-rank-stat .val {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .my-rank-stat .lbl {
+        font-size: 12px;
+        opacity: 0.75;
+        margin-top: 2px;
+      }
+
+      /* Podium */
+      .podium {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 36px;
+      }
+      .podium-place {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .podium-crown {
+        font-size: 22px;
+        margin-bottom: 4px;
+        min-height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .podium-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+      .podium-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .podium-name {
+        font-size: 12px;
+        font-weight: 600;
+        max-width: 88px;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-bottom: 4px;
+      }
+      .podium-score {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 6px;
+      }
+      .podium-block {
+        width: 88px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .gold {
+        background: linear-gradient(180deg, #ffd700, #ffa500);
+        height: 96px;
+      }
+      .silver {
+        background: linear-gradient(180deg, #c0c0c0, #909090);
+        height: 70px;
+      }
+      .bronze {
+        background: linear-gradient(180deg, #cd7f32, #a0522d);
+        height: 52px;
+      }
+
+      /* Table */
+      .lb-table-card {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+      .lb-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .lb-table thead th {
+        background: #f8f9fa;
+        padding: 12px 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-light);
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .lb-table tbody tr {
+        border-bottom: 1px solid #f1f2f6;
+        transition: background 0.15s;
+      }
+      .lb-table tbody tr:last-child {
+        border-bottom: none;
+      }
+      .lb-table tbody tr:hover {
+        background: #fafbfc;
+      }
+      .lb-table tbody tr.me {
+        background: #eef2ff;
+      }
+      .lb-table td {
+        padding: 13px 20px;
+        font-size: 14px;
+        vertical-align: middle;
+      }
+      .rank-cell {
+        font-size: 16px;
+        font-weight: 700;
+        width: 60px;
+        text-align: center;
+      }
+      .r1 {
+        color: #ffd700;
+      }
+      .r2 {
+        color: #909090;
+      }
+      .r3 {
+        color: #cd7f32;
+      }
+      .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .user-avatar-sm {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+      .user-avatar-sm img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .you-badge {
+        display: inline-block;
+        background: #eef2ff;
+        color: var(--primary-color);
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 10px;
+        margin-left: 6px;
+      }
+      .score-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .score-bar-bg {
+        flex: 1;
+        height: 7px;
+        background: #f1f2f6;
+        border-radius: 8px;
+        overflow: hidden;
+        max-width: 110px;
+      }
+      .score-bar-fill {
+        height: 100%;
+        background: var(--primary-color);
+        border-radius: 8px;
+      }
+      .score-pct-val {
+        font-weight: 700;
+        min-width: 44px;
+        font-size: 14px;
+      }
+      .correct-val {
+        color: var(--success);
+        font-weight: 600;
+      }
+      .time-val {
+        font-size: 12px;
+        color: var(--text-light);
+      }
+
+      /* Misc */
+      .empty-state {
+        text-align: center;
+        padding: 60px 24px;
+        color: var(--text-light);
+      }
+      .empty-state i {
+        font-size: 52px;
+        display: block;
+        margin-bottom: 14px;
+        color: var(--text-lighter);
+      }
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #f0f0f0 25%,
+          #e0e0e0 50%,
+          #f0f0f0 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <i
+              class="ri-cloud-line"
+              style="color: var(--primary-color); font-size: 24px"
+            ></i>
+            Curio
+          </div>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="menu-item"
+            ><i class="ri-dashboard-line"></i> Dashboard</a
+          >
+          <a href="create-quiz.html" class="menu-item"
+            ><i class="ri-add-circle-line"></i> Create Quiz</a
+          >
+          <a href="my-quizzes.html" class="menu-item active"
+            ><i class="ri-list-check-2"></i> My Quizzes</a
+          >
+          <a href="analytics.html" class="menu-item"
+            ><i class="ri-bar-chart-box-line"></i> Analytics</a
+          >
+          <a href="settings.html" class="menu-item"
+            ><i class="ri-settings-3-line"></i> Settings</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-avatar text-white">PJ</div>
+          <div class="user-info">
+            <div class="user-name">Welcome, Piyush!</div>
+            <div class="user-role">
+              <i class="ri-logout-box-r-line"></i
+              ><a href="index.html">Logout</a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main-content">
+        <header class="top-header">
+          <div class="search-bar">
+            <i class="ri-search-line"></i
+            ><input
+              type="text"
+              placeholder="Search quizzes, subjects, or students..."
+            />
+          </div>
+          <div class="header-actions">
+            <button class="notification-btn">
+              <i class="ri-notification-3-line"></i><span class="badge">0</span>
+            </button>
+            <a
+              href="create-quiz.html"
+              class="btn btn-primary d-flex align-center gap-2"
+              ><i class="ri-add-line"></i> Create New Quiz</a
+            >
+          </div>
+        </header>
+
+        <div class="main-scroll-area">
+          <div class="lb-header-row">
+            <div>
+              <h1 id="lb-title">
+                <i
+                  class="ri-trophy-line"
+                  style="color: #ffd700; margin-right: 8px"
+                ></i
+                >Leaderboard
+              </h1>
+              <p id="lb-subtitle">Loading…</p>
+            </div>
+            <a href="javascript:history.back()" class="btn btn-secondary">
+              <i class="ri-arrow-left-line" style="margin-right: 6px"></i>Back
+            </a>
+          </div>
+
+          <!-- My rank (only visible if user attempted) -->
+          <div class="my-rank-banner" id="my-rank-banner" style="display: none">
+            <div class="my-rank-left">
+              <h3>Your Rank</h3>
+              <div class="num" id="my-rank-num">—</div>
+            </div>
+            <div class="my-rank-stats">
+              <div class="my-rank-stat">
+                <div class="val" id="my-score">—</div>
+                <div class="lbl">Score</div>
+              </div>
+              <div class="my-rank-stat">
+                <div class="val" id="my-correct">—</div>
+                <div class="lbl">Correct</div>
+              </div>
+              <div class="my-rank-stat">
+                <div class="val" id="my-total">—</div>
+                <div class="lbl">Participants</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Podium -->
+          <div id="podium" class="podium" style="display: none"></div>
+
+          <!-- Full table / skeletons / empty -->
+          <div id="lb-body">
+            <div
+              class="skeleton"
+              style="height: 56px; margin-bottom: 10px; border-radius: 12px"
+            ></div>
+            <div
+              class="skeleton"
+              style="height: 56px; margin-bottom: 10px; border-radius: 12px"
+            ></div>
+            <div
+              class="skeleton"
+              style="height: 56px; margin-bottom: 10px; border-radius: 12px"
+            ></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+      const COLORS = [
+        "#5352ED",
+        "#2ED573",
+        "#FFA502",
+        "#FF4757",
+        "#A55EEA",
+        "#1E90FF",
+        "#FF6B81",
+        "#26de81",
+      ];
+      function uc(id) {
+        return COLORS[Math.abs(id) % COLORS.length];
+      }
+
+      function avatarHtml(entry, size) {
+        const s = size || 34;
+        if (entry.profile_picture) {
+          return `<div style="width:${s}px;height:${s}px;border-radius:50%;overflow:hidden;flex-shrink:0;">
+                  <img src="${entry.profile_picture}" style="width:100%;height:100%;object-fit:cover;">
+                </div>`;
+        }
+        const ini = entry.full_name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+        return `<div style="width:${s}px;height:${s}px;border-radius:50%;background:${uc(entry.user_id)};
+                         display:flex;align-items:center;justify-content:center;
+                         font-size:${Math.round(s * 0.38)}px;font-weight:700;color:#fff;flex-shrink:0;">${ini}</div>`;
+      }
+
+      function timeAgo(iso) {
+        if (!iso) return "—";
+        const diff = Date.now() - new Date(iso).getTime();
+        const m = Math.floor(diff / 60000),
+          h = Math.floor(m / 60),
+          d = Math.floor(h / 24);
+        if (m < 1) return "Just now";
+        if (m < 60) return `${m}m ago`;
+        if (h < 24) return `${h}h ago`;
+        if (d === 1) return "Yesterday";
+        return new Date(iso).toLocaleDateString("en-IN", {
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        if (!initProtectedPage()) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const quizId = params.get("id");
+        if (!quizId) {
+          window.location.href = "my-quizzes.html";
+          return;
+        }
+
+        let data;
+        try {
+          data = await LeaderboardAPI.get(quizId);
+        } catch (e) {
+          document.getElementById("lb-body").innerHTML =
+            `<div class="empty-state"><i class="ri-error-warning-line"></i><p>${e.message}</p></div>`;
+          return;
+        }
+
+        document.getElementById("lb-title").innerHTML =
+          `<i class="ri-trophy-line" style="color:#FFD700;margin-right:8px;"></i>${data.quiz_title}`;
+        document.getElementById("lb-subtitle").textContent =
+          `${data.total_participants} participant${data.total_participants !== 1 ? "s" : ""} completed this quiz`;
+
+        /* My rank banner */
+        if (data.current_user_rank) {
+          const me = data.entries.find((e) => e.is_current_user);
+          document.getElementById("my-rank-banner").style.display = "flex";
+          document.getElementById("my-rank-num").textContent =
+            `#${data.current_user_rank}`;
+          document.getElementById("my-score").textContent = `${me.score_pct}%`;
+          document.getElementById("my-correct").textContent =
+            `${me.correct_count}/${me.total_questions}`;
+          document.getElementById("my-total").textContent =
+            data.total_participants;
+        }
+
+        /* Empty state */
+        if (data.entries.length === 0) {
+          document.getElementById("lb-body").innerHTML = `
+            <div class="empty-state">
+                <i class="ri-user-line"></i>
+                <h3>No results yet</h3>
+                <p>Nobody has completed this quiz. Be the first!</p>
+            </div>`;
+          return;
+        }
+
+        /* Podium (top 3) */
+        const top = data.entries.slice(0, 3);
+        if (top.length >= 2) {
+          const podiumEl = document.getElementById("podium");
+          podiumEl.style.display = "flex";
+          // Display order: Silver (index 1), Gold (index 0), Bronze (index 2)
+          const displayOrder = [1, 0, 2];
+          const podiumCfg = [
+            { cls: "silver", icon: "🥈", h: 70 },
+            { cls: "gold", icon: "🥇", h: 96 },
+            { cls: "bronze", icon: "🥉", h: 52 },
+          ];
+          podiumEl.innerHTML = displayOrder
+            .map((i) => {
+              const e = top[i];
+              if (!e) return "";
+              const c = podiumCfg[i];
+              const ini = e.full_name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              const avatarInner = e.profile_picture
+                ? `<img src="${e.profile_picture}">`
+                : ini;
+              return `
+            <div class="podium-place">
+                <div class="podium-crown">${i === 1 ? "👑" : ""}</div>
+                <div class="podium-avatar" style="background:${uc(e.user_id)};">${avatarInner}</div>
+                <div class="podium-name">${e.full_name}${e.is_current_user ? ' <span style="color:var(--primary-color)">(You)</span>' : ""}</div>
+                <div class="podium-score">${e.score_pct}%</div>
+                <div class="podium-block ${c.cls}" style="height:${c.h}px;">${c.icon}</div>
+            </div>`;
+            })
+            .join("");
+        }
+
+        /* Full ranked table */
+        document.getElementById("lb-body").innerHTML = `
+        <div class="lb-table-card">
+            <table class="lb-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:center;">Rank</th>
+                        <th>Participant</th>
+                        <th>Score</th>
+                        <th>Correct</th>
+                        <th>Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.entries
+                      .map((e) => {
+                        const rankIcon =
+                          e.rank === 1
+                            ? "🥇"
+                            : e.rank === 2
+                              ? "🥈"
+                              : e.rank === 3
+                                ? "🥉"
+                                : `#${e.rank}`;
+                        const rankCls =
+                          e.rank === 1
+                            ? "r1"
+                            : e.rank === 2
+                              ? "r2"
+                              : e.rank === 3
+                                ? "r3"
+                                : "";
+                        const youBadge = e.is_current_user
+                          ? '<span class="you-badge">You</span>'
+                          : "";
+                        const ini = e.full_name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2);
+                        const av = e.profile_picture
+                          ? `<div class="user-avatar-sm"><img src="${e.profile_picture}"></div>`
+                          : `<div class="user-avatar-sm" style="background:${uc(e.user_id)};">${ini}</div>`;
+                        return `
+                        <tr class="${e.is_current_user ? "me" : ""}">
+                            <td class="rank-cell ${rankCls}">${rankIcon}</td>
+                            <td><div class="user-cell">${av}<span>${e.full_name}${youBadge}</span></div></td>
+                            <td>
+                                <div class="score-wrap">
+                                    <div class="score-bar-bg"><div class="score-bar-fill" style="width:${e.score_pct}%"></div></div>
+                                    <span class="score-pct-val">${e.score_pct}%</span>
+                                </div>
+                            </td>
+                            <td class="correct-val">${e.correct_count}/${e.total_questions}</td>
+                            <td class="time-val">${timeAgo(e.completed_at)}</td>
+                        </tr>`;
+                      })
+                      .join("")}
+                </tbody>
+            </table>
+        </div>`;
+      });
+    </script>
+  </body>
+</html>
