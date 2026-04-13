@@ -7,7 +7,7 @@ from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# ── Engine ────────────────────────────────────────────────────────────────────
+#  Engine 
 engine = create_engine(
     settings.DATABASE_URL,
     pool_size=settings.DB_POOL_SIZE,
@@ -23,13 +23,13 @@ def check_db_connection():
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        logger.info("✅ PostgreSQL connection successful.")
+        logger.info("PostgreSQL connection successful.")
     except OperationalError as e:
-        logger.error(f"❌ PostgreSQL connection FAILED: {e}")
+        logger.error(f"PostgreSQL connection FAILED: {e}")
         raise
 
 
-# ── Session factory ───────────────────────────────────────────────────────────
+#  Session factory 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

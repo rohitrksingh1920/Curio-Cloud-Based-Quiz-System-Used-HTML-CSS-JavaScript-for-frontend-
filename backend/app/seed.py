@@ -22,7 +22,7 @@ def seed():
 
     print("Seeding database…")
 
-    # ── Users ─────────────────────────────────────────────────────────────────
+    # Users 
     admin = User(
         full_name="Admin User",
         email="admin@projexi.com",
@@ -58,7 +58,7 @@ def seed():
     db.add_all([admin, rohit] + students)
     db.flush()
 
-    # ── Quizzes ───────────────────────────────────────────────────────────────
+    #  Quizzes 
     quiz_data = [
         {
             "title": "Advanced Python Concepts",
@@ -152,7 +152,7 @@ def seed():
 
     db.flush()
 
-    # ── Historical completed attempts (for analytics) ─────────────────────────
+    #  Historical completed attempts (for analytics) 
     historical = [
         (QuizCategory.computer_science, 75, 14),
         (QuizCategory.mathematics,      80, 13),
@@ -192,17 +192,17 @@ def seed():
         )
         db.add(attempt)
 
-    # ── Student enrollments ───────────────────────────────────────────────────
+    #  Student enrollments 
     for quiz in quizzes:
         for student in students:
             db.add(QuizAttempt(user_id=student.id, quiz_id=quiz.id))
 
-    # ── Notifications ─────────────────────────────────────────────────────────
+    #  Notifications 
     db.add_all([
         Notification(
             user_id=rohit.id,
             type=NotificationType.system,
-            title="Welcome to Curio! 🎉",
+            title="Welcome to Curio! ",
             message=f"Hi Rohit, your account is ready. Start by creating or taking a quiz!",
             is_read=False,
         ),
@@ -216,14 +216,14 @@ def seed():
         Notification(
             user_id=admin.id,
             type=NotificationType.system,
-            title="Welcome to Curio! 🎉",
+            title="Welcome to Curio! ",
             message="Your admin account is set up.",
             is_read=False,
         ),
     ])
 
     db.commit()
-    print("✅ Seeding complete!")
+    print(" Seeding complete!")
     print("\n  Demo accounts:")
     print("  ┌────────────────────────────────────────────────────────────────┐")
     print("  │  Admin   │ admin@projexi.com              │ admin1234          │")

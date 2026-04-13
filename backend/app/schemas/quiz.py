@@ -4,7 +4,7 @@ from datetime import date, time, datetime
 from backend.app.models.quiz import QuizStatus, QuizCategory
 
 
-# ── Option Schemas ────────────────────────────────────────────────────────────
+#  Option Schemas 
 
 class OptionCreate(BaseModel):
     text: str
@@ -28,7 +28,7 @@ class OptionOutPublic(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ── Question Schemas ──────────────────────────────────────────────────────────
+#  Question Schemas 
 
 class QuestionCreate(BaseModel):
     text: str
@@ -64,7 +64,7 @@ class QuestionOutPublic(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ── Quiz Schemas ──────────────────────────────────────────────────────────────
+#  Quiz Schemas 
 
 class QuizCreate(BaseModel):
     title: str
@@ -113,7 +113,7 @@ class QuizSummary(BaseModel):
     enrolled_count: int
     creator_name: str
     created_at: datetime
-    is_attempted: bool = False      # ← needed by frontend buildQuizCard()
+    is_attempted: bool = False      
     model_config = {"from_attributes": True}
 
 

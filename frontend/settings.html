@@ -14,7 +14,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <style>
-      /* ── Settings Layout ── */
+      /*  Settings Layout  */
       .settings-container {
         display: flex;
         gap: 32px;
@@ -82,7 +82,7 @@
         margin-bottom: 24px;
       }
 
-      /* ── Avatar ── */
+      /*  Avatar  */
       .profile-header {
         display: flex;
         align-items: center;
@@ -154,7 +154,7 @@
         gap: 6px;
       }
 
-      /* ── Form ── */
+      /*  Form  */
       .form-group {
         margin-bottom: 24px;
       }
@@ -186,7 +186,7 @@
         margin-top: 4px;
       }
 
-      /* ── Preferences ── */
+      /*  Preferences  */
       .preferences-header {
         font-size: 15px;
         font-weight: 700;
@@ -231,7 +231,7 @@
         margin: 0;
       }
 
-      /* ── Toggle ── */
+      /*  Toggle  */
       .toggle-switch {
         position: relative;
         display: inline-block;
@@ -286,7 +286,7 @@
         border-radius: 8px;
       }
 
-      /* ── OTP step bar ── */
+      /*  OTP step bar  */
       .step-bar {
         display: flex;
         align-items: center;
@@ -372,7 +372,7 @@
         font-weight: 600;
       }
 
-      /* ── Notification items ── */
+      /*  Notification items  */
       .notification-item {
         display: flex;
         justify-content: space-between;
@@ -474,7 +474,7 @@
             </div>
 
             <div class="settings-content">
-              <!-- ══ PROFILE ══════════════════════════════════════════ -->
+              <!--  PROFILE  -->
               <div id="tab-profile" class="settings-section active">
                 <h2>Profile</h2>
                 <div class="settings-card">
@@ -592,7 +592,7 @@
                 </div>
               </div>
 
-              <!-- ══ SECURITY ═════════════════════════════════════════ -->
+              <!--  SECURITY  -->
               <div id="tab-security" class="settings-section">
                 <h2>Security</h2>
                 <div class="settings-card">
@@ -700,7 +700,7 @@
                         margin-bottom: 20px;
                       "
                     >
-                      ✅ Code verified! Set your new password below.
+                       Code verified! Set your new password below.
                     </p>
                     <div class="form-group">
                       <label>NEW PASSWORD</label>
@@ -791,7 +791,7 @@
           });
         });
 
-        /* ── Load profile ── */
+        /*  Load profile  */
         let profile;
         try {
           profile = await SettingsAPI.getProfile();
@@ -831,21 +831,21 @@
           }
         }
 
-        /* ── Dark mode: apply instantly on toggle ── */
+        /*  Dark mode: apply instantly on toggle  */
         document
           .getElementById("pf-darkmode")
           .addEventListener("change", (e) => {
             Theme.setDark(e.target.checked);
           });
 
-        /* ── Language: apply instantly on change ── */
+        /*  Language: apply instantly on change  */
         document
           .getElementById("pf-language")
           .addEventListener("change", (e) => {
             Theme.setLang(e.target.value);
           });
 
-        /* ── Avatar upload ── */
+        /*  Avatar upload  */
         document
           .getElementById("avatar-edit-btn")
           .addEventListener("click", () => {
@@ -894,7 +894,7 @@
             }
           });
 
-        /* ── Save Profile ── */
+        /*  Save Profile  */
         document
           .getElementById("save-profile-btn")
           .addEventListener("click", async () => {
@@ -921,7 +921,7 @@
             }
           });
 
-        /* ── OTP 3-step flow ── */
+        /*  OTP 3-step flow  */
         let otpTimer = null,
           verifiedOtp = null;
 
@@ -1032,7 +1032,7 @@
             }
           });
 
-        /* ── Notification preferences ── */
+        /*  Notification preferences  */
         document
           .getElementById("save-notif-btn")
           .addEventListener("click", async () => {

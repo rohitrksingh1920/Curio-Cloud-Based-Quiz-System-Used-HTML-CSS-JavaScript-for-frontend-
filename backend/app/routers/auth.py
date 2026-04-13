@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 _forgot_otp_store: dict = {}
 
 
-# ── Signup ────────────────────────────────────────────────────────────────────
+#  Signup 
 
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 def signup(payload: SignupRequest, db: Session = Depends(get_db)):
@@ -59,7 +59,7 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=token, user=UserOut.model_validate(user))
 
 
-# ── Login ─────────────────────────────────────────────────────────────────────
+#  Login 
 
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)):
@@ -80,7 +80,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     return TokenResponse(access_token=token, user=UserOut.model_validate(user))
 
 
-# ── Me ────────────────────────────────────────────────────────────────────────
+#  Me 
 
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):
@@ -88,7 +88,7 @@ def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-# ── Logout ────────────────────────────────────────────────────────────────────
+#  Logout 
 
 @router.post("/logout")
 def logout():
@@ -96,7 +96,7 @@ def logout():
     return {"message": "Logged out successfully"}
 
 
-# ── Forgot Password — Step 1: Send OTP ───────────────────────────────────────
+#  Forgot Password — Step 1: Send OTP 
 
 @router.post("/forgot-password")
 def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
@@ -136,7 +136,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     return {"message": f"OTP sent to {email}. Valid for 10 minutes."}
 
 
-# ── Reset Password — Step 2: Verify OTP + Set New Password ───────────────────
+#  Reset Password — Step 2: Verify OTP + Set New Password 
 
 @router.post("/reset-password")
 def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db)):

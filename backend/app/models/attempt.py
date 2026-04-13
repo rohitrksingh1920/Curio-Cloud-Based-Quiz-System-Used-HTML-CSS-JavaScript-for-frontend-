@@ -11,8 +11,8 @@ class QuizAttempt(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     quiz_id = Column(Integer, ForeignKey("quizzes.id", ondelete="CASCADE"), nullable=False)
-    score = Column(Float, nullable=True)          # raw points scored
-    score_pct = Column(Float, nullable=True)      # percentage 0-100
+    score = Column(Float, nullable=True)          
+    score_pct = Column(Float, nullable=True)      
     is_completed = Column(Boolean, default=False)
     started_at = Column(DateTime(timezone=True), server_default=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)

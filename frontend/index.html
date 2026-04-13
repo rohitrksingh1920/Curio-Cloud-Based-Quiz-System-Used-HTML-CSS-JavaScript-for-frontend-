@@ -14,7 +14,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <style>
-      /* ── Login page specific ─────────────────────────── */
+      /*  Login page specific  */
       .error-box {
         background: #fff0f0;
         border: 1px solid #ffd0d0;
@@ -53,7 +53,7 @@
         border-radius: 8px;
       }
 
-      /* ── Modal overlay ───────────────────────────────── */
+      /*  Modal overlay  */
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -121,7 +121,7 @@
         line-height: 1.5;
       }
 
-      /* ── Step progress bar ───────────────────────────── */
+      /*  Step progress bar  */
       .step-bar {
         display: flex;
         align-items: center;
@@ -161,7 +161,7 @@
         background: var(--success);
       }
 
-      /* ── Modal steps ─────────────────────────────────── */
+      /*  Modal steps  */
       .fp-step {
         display: none;
       }
@@ -169,7 +169,7 @@
         display: block;
       }
 
-      /* ── Email hint box ──────────────────────────────── */
+      /*  Email hint box  */
       .email-hint {
         background: #eef2ff;
         border-radius: 10px;
@@ -197,7 +197,7 @@
         word-break: break-all;
       }
 
-      /* ── OTP input ───────────────────────────────────── */
+      /*  OTP input  */
       .otp-input-wrap {
         position: relative;
         margin-bottom: 6px;
@@ -233,7 +233,7 @@
         color: var(--primary-hover);
       }
 
-      /* ── Modal form inputs ───────────────────────────── */
+      /*  Modal form inputs  */
       .modal-input-group {
         margin-bottom: 16px;
       }
@@ -250,7 +250,7 @@
         border-radius: 8px;
       }
 
-      /* ── Success step ────────────────────────────────── */
+      /*  Success step  */
       .success-icon-wrap {
         text-align: center;
         padding: 16px 0 28px;
@@ -279,9 +279,9 @@
     </style>
   </head>
   <body class="auth-page">
-    <!-- ══════════════════════════════════════════════════════
-         LOGIN CARD
-    ══════════════════════════════════════════════════════ -->
+
+         <!-- LOGIN CARD -->
+
     <div class="auth-container">
       <div class="auth-left">
         <h1>Curio Cloud Quiz</h1>
@@ -344,9 +344,8 @@
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════
-         FORGOT PASSWORD MODAL  (3 steps)
-    ══════════════════════════════════════════════════════ -->
+         <!-- FORGOT PASSWORD MODAL  (3 steps) -->
+
     <div class="modal-overlay" id="fp-modal">
       <div class="modal-box">
         <button class="modal-close" id="fp-close" title="Close">
@@ -447,7 +446,7 @@
           </button>
         </div>
 
-        <!-- ── Step 3: New password ── -->
+        <!--  Step 3: New password  -->
         <div class="fp-step" id="fp-step-3">
           <div class="modal-title">Set New Password</div>
           <div class="modal-subtitle">
@@ -492,7 +491,7 @@
         <!-- ── Step 4: Success ── -->
         <div class="fp-step" id="fp-step-4">
           <div class="success-icon-wrap">
-            <div class="icon-circle">✅</div>
+            <div class="icon-circle"></div>
             <h3>Password Reset!</h3>
             <p>
               Your password has been changed successfully.<br />You can now log
@@ -519,7 +518,7 @@
       document.addEventListener("DOMContentLoaded", () => {
         Auth.redirectIfLoggedIn();
 
-        /* ────────────────── LOGIN ────────────────── */
+        /*  LOGIN  */
         const loginBtn = document.getElementById("login-btn");
         const emailEl = document.getElementById("login-email");
         const passEl = document.getElementById("login-password");
@@ -564,13 +563,13 @@
           if (e.key === "Enter") doLogin();
         });
 
-        /* ────────────────── FORGOT PASSWORD MODAL ────────────────── */
+        /*  FORGOT PASSWORD MODAL  */
         const modal = document.getElementById("fp-modal");
         const fpClose = document.getElementById("fp-close");
         let fpEmail = ""; // stores email between steps
         let otpTimer = null; // interval handle
 
-        // ── helpers ──────────────────────────────────────────────────
+        //  helpers 
         function openModal() {
           modal.classList.add("open");
           goToStep(1);
@@ -635,7 +634,7 @@
           otpTimer = setInterval(tick, 1000);
         }
 
-        // ── Step 1: send OTP ─────────────────────────────────────────
+        //  Step 1: send OTP 
         async function doSendOtp() {
           hideFpErr(1);
           const email = (document.getElementById("fp-email")?.value || fpEmail)
@@ -673,7 +672,7 @@
           }
         }
 
-        // ── Step 2: verify OTP ───────────────────────────────────────
+        //  Step 2: verify OTP 
         async function doVerifyOtp() {
           hideFpErr(2);
           const otp = document.getElementById("fp-otp-input").value.trim();
@@ -686,7 +685,7 @@
           goToStep(3);
         }
 
-        // ── Step 3: save new password ────────────────────────────────
+        //  Step 3: save new password 
         async function doSavePassword() {
           hideFpErr(3);
           const otp = document.getElementById("fp-otp-input").value.trim();
@@ -723,7 +722,7 @@
           }
         }
 
-        // ── Event bindings ───────────────────────────────────────────
+        //  Event bindings 
         document
           .getElementById("forgot-link")
           .addEventListener("click", (e) => {

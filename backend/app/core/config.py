@@ -4,34 +4,32 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 from typing import List
 
-# Resolve .env relative to this file:
-# This file  → THE2/backend/app/core/config.py
-# .env       → THE2/backend/.env
+
 _ENV_FILE = os.path.normpath(
     os.path.join(os.path.dirname(__file__), "..", "..", ".env")
 )
 
 
 class Settings(BaseSettings):
-    # ── Application ───────────────────────────────────────────────────────────
+    #  Application 
     APP_NAME: str = "Curio"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
     ENVIRONMENT: str = "development"
 
-    # ── PostgreSQL ────────────────────────────────────────────────────────────
+    #  PostgreSQL 
     DATABASE_URL: str = "postgresql://postgres:1234@localhost:5432/curio_db"
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_TIMEOUT: int = 30
     DB_POOL_RECYCLE: int = 1800
 
-    # ── JWT ───────────────────────────────────────────────────────────────────
+    #  JWT 
     SECRET_KEY: str = "supersecret"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
-    # ── CORS ──────────────────────────────────────────────────────────────────
+    #  CORS 
     FRONTEND_ORIGINS: List[str] = [
         "http://localhost",
         "http://localhost:80",
@@ -41,7 +39,7 @@ class Settings(BaseSettings):
         "null",
     ]
 
-    # ── SMTP (OTP emails) ─────────────────────────────────────────────────────
+    #  SMTP (OTP emails) 
     # Gmail App Password: generate at myaccount.google.com → Security → App Passwords
     # Store WITHOUT spaces, e.g.:  SMTP_PASS=cdjnzlsyvpirxcko
     SMTP_HOST: str = "smtp.gmail.com"
@@ -50,10 +48,10 @@ class Settings(BaseSettings):
     SMTP_PASS: str = "cdjnzlsyvpirxcko"
     EMAILS_FROM_NAME: str = "Curio"
 
-    # ── Static files ──────────────────────────────────────────────────────────
+    #  Static files 
     STATIC_BASE_URL: str = ""
 
-    # ── AWS / Deployment ──────────────────────────────────────────────────────
+    #  AWS / Deployment 
     EC2_PUBLIC_IP: str = ""
     ALLOWED_HOSTS: List[str] = ["*"]
 

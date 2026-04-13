@@ -12,25 +12,25 @@ from fastapi.staticfiles import StaticFiles
 from backend.app.core.config import settings
 from backend.app.core.database import Base, engine, check_db_connection
 
-# ── Register all models so SQLAlchemy creates tables ─────────────────────────
-from backend.app.models.user import User                                # noqa
-from backend.app.models.quiz import Quiz, Question, QuestionOption      # noqa
-from backend.app.models.attempt import QuizAttempt, AttemptAnswer       # noqa
-from backend.app.models.notification import Notification                # noqa
+#  Register all models so SQLAlchemy creates tables 
+from backend.app.models.user import User                                
+from backend.app.models.quiz import Quiz, Question, QuestionOption      
+from backend.app.models.attempt import QuizAttempt, AttemptAnswer       
+from backend.app.models.notification import Notification                
 
-# ── Routers ───────────────────────────────────────────────────────────────────
+#  Routers  #
 from backend.app.routers import auth, dashboard, quiz, analytics
 from backend.app.routers import settings as settings_router
 from backend.app.routers import notifications
-from backend.app.routers import leaderboard          # ← NEW
+from backend.app.routers import leaderboard          
 
-# ── Create static/avatars directory before StaticFiles is mounted ─────────────
+#  Create static/avatars directory before StaticFiles is mounted 
 # Must exist before the app starts — StaticFiles will crash if dir is missing.
 _STATIC_DIR  = os.path.join(os.getcwd(), "static")
 _AVATARS_DIR = os.path.join(_STATIC_DIR, "avatars")
 os.makedirs(_AVATARS_DIR, exist_ok=True)
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+#  Logging 
 logging.basicConfig(
     level=logging.DEBUG if settings.DEBUG else logging.INFO,
     format="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
@@ -40,7 +40,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ── Lifespan ──────────────────────────────────────────────────────────────────
+#  Lifespan  #
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION} [{settings.ENVIRONMENT}]")
@@ -51,7 +51,7 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down.")
 
 
-# ── App ───────────────────────────────────────────────────────────────────────
+#  App  #
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -75,33 +75,33 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# ── API Routers (ALL registered before any static mounts) ────────────────────
+#  API Routers (ALL registered before any static mounts)  
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(quiz.router)
 app.include_router(analytics.router)
 app.include_router(settings_router.router)
 app.include_router(notifications.router)
-app.include_router(leaderboard.router)      # ← NEW
+app.include_router(leaderboard.router)      
 
-# ── Static files: uploaded avatars (/static/avatars/<uuid>.jpg) ──────────────
+#  Static files: uploaded avatars (/static/avatars/<uuid>.jpg)  
 # Must come AFTER all API routers and BEFORE the catch-all frontend mount.
 app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
-# ── Frontend catch-all (MUST be last) ────────────────────────────────────────
+#  Frontend catch-all (MUST be last)  
 _frontend_dir = os.path.join(os.getcwd(), "frontend")
 if os.path.isdir(_frontend_dir):
     app.mount("/", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
     logger.info(f"Serving frontend from {os.path.abspath(_frontend_dir)}")
 
 
-# ── Health ────────────────────────────────────────────────────────────────────
+#  Health 
 @app.get("/health", include_in_schema=False)
 def health():
     return {"status": "ok", "app": settings.APP_NAME, "env": settings.ENVIRONMENT}
 
 
-# ── Global error handler ──────────────────────────────────────────────────────
+#  Global error handler 
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     logger.exception(f"Unhandled error on {request.url.path}: {exc}")

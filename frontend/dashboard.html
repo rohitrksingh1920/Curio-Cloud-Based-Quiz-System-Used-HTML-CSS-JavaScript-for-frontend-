@@ -74,7 +74,7 @@
         font-size: 14px;
       }
 
-      /* ── Quiz cards ─────────────────────────────────── */
+      /*  Quiz cards  */
       .quiz-cards {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -383,7 +383,7 @@
             `Welcome ${user.full_name.split(" ")[0]} to your Dashboard 👋`;
         }
 
-        // ── Stats ──────────────────────────────────────────
+        //  Stats 
         try {
           const stats = await DashboardAPI.getStats();
           document.getElementById("stat-quizzes").textContent =
@@ -396,7 +396,7 @@
           console.error("Stats error:", e);
         }
 
-        // ── Upcoming + Active quizzes ───────────────────────
+        //  Upcoming + Active quizzes  
         const upcomingContainer = document.getElementById(
           "quiz-cards-container",
         );
@@ -449,7 +449,7 @@
           });
       });
 
-      /* ── Card builders ─────────────────────────────────── */
+      /*  Card builders  */
 
       function badgeClass(status) {
         if (status === "upcoming") return "upcoming";

@@ -22,10 +22,10 @@
   --radius-lg: 20px;
 }
 
-/* ════════════════════════════════════════════════════════════
+/* 
    DARK MODE — applied via  html[data-theme="dark"]
    Set by Theme.setDark() in api.js
-   ════════════════════════════════════════════════════════════ */
+    */
 html[data-theme="dark"] {
   --bg-color: #0f1117;
   --white: #1a1d27;
@@ -134,9 +134,9 @@ html[data-theme="dark"] .auth-right {
   background-color: var(--white);
 }
 
-/* ════════════════════════════════════════════════════════════
+/* 
    BASE STYLES
-   ════════════════════════════════════════════════════════════ */
+    */
 
 * {
   margin: 0;

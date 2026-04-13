@@ -18,7 +18,7 @@ from backend.app.schemas.quiz import QuizSummary
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 
 
-# ── Stats ─────────────────────────────────────────────────────────────────────
+#  Stats 
 
 @router.get("/stats", response_model=DashboardStats)
 def get_dashboard_stats(
@@ -55,7 +55,7 @@ def get_dashboard_stats(
     )
 
 
-# ── Upcoming Quizzes ──────────────────────────────────────────────────────────
+#  Upcoming Quizzes 
 
 @router.get("/upcoming-quizzes", response_model=list[QuizSummary])
 def get_upcoming_quizzes(
@@ -105,7 +105,7 @@ def get_upcoming_quizzes(
     return [_to_quiz_summary(q, current_user.id) for q in upcoming[:limit]]
 
 
-# ── Active Quizzes ────────────────────────────────────────────────────────────
+#  Active Quizzes 
 
 @router.get("/active-quizzes", response_model=list[QuizSummary])
 def get_active_quizzes(
@@ -150,7 +150,7 @@ def get_active_quizzes(
     return [_to_quiz_summary(q, current_user.id) for q in active]
 
 
-# ── Shared helper ─────────────────────────────────────────────────────────────
+#  Shared helper 
 
 def _to_quiz_summary(quiz: Quiz, current_user_id: int) -> QuizSummary:
     now = datetime.now(timezone.utc)

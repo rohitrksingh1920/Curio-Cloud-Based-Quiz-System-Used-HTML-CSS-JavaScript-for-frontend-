@@ -22,7 +22,7 @@ from backend.app.schemas.misc import AttemptSubmit, AttemptResult
 router = APIRouter(prefix="/api/quizzes", tags=["Quiz"])
 
 
-# ── Create ────────────────────────────────────────────────────────────────────
+#  Create 
 
 @router.post("", response_model=QuizDetail, status_code=status.HTTP_201_CREATED)
 def create_quiz(
@@ -67,7 +67,7 @@ def create_quiz(
     return _to_quiz_detail(new_quiz)
 
 
-# ── List / Filter ─────────────────────────────────────────────────────────────
+#  List / Filter 
 # FIX 1: Changed @router.get("/") to @router.get("") to remove trailing slash.
 # The old "/" caused FastAPI to issue a 307 redirect for requests to /api/quizzes
 # which stripped the Authorization header, causing silent 401s and empty lists.
@@ -106,7 +106,7 @@ def list_my_quizzes(
     return summaries
 
 
-# ── Get Single ────────────────────────────────────────────────────────────────
+#  Get Single 
 
 @router.get("/{quiz_id}", response_model=QuizDetail)
 def get_quiz(
@@ -121,7 +121,7 @@ def get_quiz(
     return _to_quiz_detail(quiz)
 
 
-# ── Take Quiz ─────────────────────────────────────────────────────────────────
+#  Take Quiz 
 
 @router.get("/{quiz_id}/take", response_model=QuizPublic)
 def take_quiz(
@@ -202,7 +202,7 @@ def take_quiz(
     )
 
 
-# ── Submit Attempt ────────────────────────────────────────────────────────────
+#  Submit Attempt 
 
 @router.post("/{quiz_id}/submit", response_model=AttemptResult)
 def submit_quiz(
@@ -285,7 +285,7 @@ def submit_quiz(
     )
 
 
-# ── Update ────────────────────────────────────────────────────────────────────
+#  Update 
 
 @router.patch("/{quiz_id}", response_model=QuizSummary)
 def update_quiz(
@@ -306,7 +306,7 @@ def update_quiz(
     return _to_quiz_summary(quiz, current_user.id)
 
 
-# ── Delete ────────────────────────────────────────────────────────────────────
+#  Delete 
 
 @router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_quiz(
@@ -322,7 +322,7 @@ def delete_quiz(
     db.commit()
 
 
-# ── Internal helpers ──────────────────────────────────────────────────────────
+#  Internal helpers 
 
 def _get_quiz_or_404(quiz_id: int, db: Session) -> Quiz:
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()

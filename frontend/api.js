@@ -2,7 +2,7 @@
 
 const API_BASE = "";
 
-/* ── Theme (applied IMMEDIATELY, before DOMContentLoaded) ──────────────────── */
+/*  Theme (applied IMMEDIATELY, before DOMContentLoaded)  */
 const Theme = {
   apply() {
     const user = Auth.getUser();
@@ -42,7 +42,7 @@ const Theme = {
   },
 };
 
-/* ── Auth helpers ───────────────────────────────────────────────────────────── */
+/*  Auth helpers  */
 const Auth = {
   getToken() {
     return localStorage.getItem("cq_token");
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
   Theme.apply();
 });
 
-/* ── Core fetch ─────────────────────────────────────────────────────────────── */
+/*  Core fetch  */
 async function apiFetch(path, options = {}) {
   const token = Auth.getToken();
   const headers = { "Content-Type": "application/json", ...options.headers };
@@ -113,7 +113,7 @@ async function apiFetch(path, options = {}) {
   return data;
 }
 
-/* ── Auth API ───────────────────────────────────────────────────────────────── */
+/*  Auth API  */
 const AuthAPI = {
   async login(email, password) {
     // const fd = new URLSearchParams();
@@ -156,7 +156,7 @@ const AuthAPI = {
   },
 };
 
-/* ── Forgot Password API ────────────────────────────────────────────────────── */
+/*  Forgot Password API  */
 const ForgotPasswordAPI = {
   /** Step 1: send OTP to the registered email. No token needed. */
   sendOtp(email) {
@@ -179,7 +179,7 @@ const ForgotPasswordAPI = {
   },
 };
 
-/* ── Dashboard API ──────────────────────────────────────────────────────────── */
+/*  Dashboard API  */
 const DashboardAPI = {
   getStats() {
     return apiFetch("/api/dashboard/stats");
@@ -192,7 +192,7 @@ const DashboardAPI = {
   },
 };
 
-/* ── Quiz API ───────────────────────────────────────────────────────────────── */
+/*  Quiz API  */
 const QuizAPI = {
   list(search = "", status = "") {
     const p = new URLSearchParams();
@@ -229,21 +229,21 @@ const QuizAPI = {
   },
 };
 
-/* ── Analytics API ──────────────────────────────────────────────────────────── */
+/*  Analytics API  */
 const AnalyticsAPI = {
   get() {
     return apiFetch("/api/analytics");
   },
 };
 
-/* ── Leaderboard API ────────────────────────────────────────────────────────── */
+/*  Leaderboard API  */
 const LeaderboardAPI = {
   get(quizId) {
     return apiFetch(`/api/leaderboard/${quizId}`);
   },
 };
 
-/* ── Settings API ───────────────────────────────────────────────────────────── */
+/*  Settings API  */
 const SettingsAPI = {
   getProfile() {
     return apiFetch("/api/settings/profile");
@@ -288,7 +288,7 @@ const SettingsAPI = {
   },
 };
 
-/* ── Notifications API ──────────────────────────────────────────────────────── */
+/*  Notifications API  */
 const NotificationsAPI = {
   list(unreadOnly = false) {
     return apiFetch(`/api/notifications?unread_only=${unreadOnly}`);
@@ -304,7 +304,7 @@ const NotificationsAPI = {
   },
 };
 
-/* ── UI helpers ─────────────────────────────────────────────────────────────── */
+/*  UI helpers  */
 const UI = {
   toast(message, type = "success") {
     document.querySelectorAll(".cq-toast").forEach((t) => t.remove());
@@ -473,7 +473,7 @@ const UI = {
   },
 };
 
-/* ── Page bootstrap ─────────────────────────────────────────────────────────── */
+/*  Page bootstrap  */
 function initProtectedPage() {
   if (!Auth.requireAuth()) return false;
   Theme.apply();

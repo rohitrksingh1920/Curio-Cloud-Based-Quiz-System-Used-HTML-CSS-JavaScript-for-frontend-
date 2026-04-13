@@ -27,7 +27,7 @@ UPLOAD_DIR = os.path.join("static", "avatars")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-# ── Profile ───────────────────────────────────────────────────────────────────
+#  Profile 
 
 @router.get("/profile", response_model=UserProfileOut)
 def get_profile(current_user: User = Depends(get_current_user)):
@@ -99,7 +99,7 @@ async def upload_avatar(
     return current_user
 
 
-# ── Security — OTP flow ───────────────────────────────────────────────────────
+# Security — OTP flow 
 
 @router.post("/security/request-otp")
 def request_otp(current_user: User = Depends(get_current_user)):
@@ -184,7 +184,7 @@ def change_password(
     return {"message": "Password updated successfully"}
 
 
-# ── Notifications ─────────────────────────────────────────────────────────────
+# Notifications 
 
 @router.patch("/notifications", response_model=UserProfileOut)
 def update_notification_prefs(
