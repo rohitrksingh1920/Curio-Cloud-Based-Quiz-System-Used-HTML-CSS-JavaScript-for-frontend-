@@ -1,61 +1,154 @@
+# version: "3.9"
+
+# # ── Local development stack ───────────────────────────────────────────────────
+# # Start everything:   docker compose up --build
+# # Stop:               docker compose down
+# # Wipe DB:            docker compose down -v
+
+# services:
+
+#   # ── PostgreSQL 15 ───────────────────────────────────────────
+#   db:
+#     image: postgres:15-alpine
+#     container_name: cloudquiz_db
+#     restart: unless-stopped
+#     environment:
+#       POSTGRES_DB:       cloudquiz
+#       POSTGRES_USER:     cloudquiz
+#       POSTGRES_PASSWORD: localdevpass
+#     ports:
+#       - "5432:5432"       # expose so you can connect with pgAdmin / DBeaver
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -U cloudquiz"]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 5
+
+#   # ── FastAPI backend ──────────────────────────────────────────
+#   backend:
+#     build:
+#       context: ./backend
+#       dockerfile: Dockerfile
+#     container_name: cloudquiz_backend
+#     restart: unless-stopped
+#     depends_on:
+#       db:
+#         condition: service_healthy
+#     environment:
+#       DATABASE_URL:                  postgresql://cloudquiz:localdevpass@db:5432/cloudquiz
+#       SECRET_KEY:                    local-dev-secret-not-for-production
+#       DEBUG:                         "true"
+#       ENVIRONMENT:                   development
+#       FRONTEND_ORIGINS:              '["http://localhost", "http://localhost:80", "http://127.0.0.1"]'
+#       ACCESS_TOKEN_EXPIRE_MINUTES:   "1440"
+#     ports:
+#       - "8000:8000"       # API accessible at http://localhost:8000
+#     volumes:
+#       - ./backend:/app    # hot-reload: code changes reflected immediately
+#     command: >
+#       sh -c "alembic -c /app/../alembic.ini upgrade head &&
+#              python -m app.seed &&
+#              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+#   # ── Nginx (serves frontend + proxies /api to backend) ────────
+#   nginx:
+#     image: nginx:1.25-alpine
+#     container_name: cloudquiz_nginx
+#     restart: unless-stopped
+#     depends_on:
+#       - backend
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ./frontend:/usr/share/nginx/html:ro
+#       - ./nginx/cloudquiz.conf:/etc/nginx/conf.d/default.conf:ro
+
+# volumes:
+#   postgres_data:
+
+
+
+
+
+
+
+
+
+
+
+
+
 version: "3.9"
 
-# ── Local development stack ───────────────────────────────────────────────────
-# Start everything:   docker compose up --build
-# Stop:               docker compose down
-# Wipe DB:            docker compose down -v
+# ── Curio Cloud Quiz — Local Development Stack ───────────────
+# Start:   docker compose up --build
+# Stop:    docker compose down
+# Wipe DB: docker compose down -v
+# Logs:    docker compose logs -f backend
 
 services:
 
-  # ── PostgreSQL 15 ───────────────────────────────────────────
+  # ── PostgreSQL 15 ──────────────────────────────────────────
   db:
     image: postgres:15-alpine
-    container_name: cloudquiz_db
+    container_name: curio_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB:       cloudquiz
-      POSTGRES_USER:     cloudquiz
+      POSTGRES_DB:       curio_db
+      POSTGRES_USER:     curio_user
       POSTGRES_PASSWORD: localdevpass
     ports:
-      - "5432:5432"       # expose so you can connect with pgAdmin / DBeaver
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cloudquiz"]
+      test: ["CMD-SHELL", "pg_isready -U curio_user -d curio_db"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # ── FastAPI backend ──────────────────────────────────────────
+  # ── FastAPI backend ─────────────────────────────────────────
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: cloudquiz_backend
+      context: .              # build from project ROOT (THE2/)
+      dockerfile: backend/Dockerfile
+    container_name: curio_backend
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL:                  postgresql://cloudquiz:localdevpass@db:5432/cloudquiz
-      SECRET_KEY:                    local-dev-secret-not-for-production
-      DEBUG:                         "true"
-      ENVIRONMENT:                   development
-      FRONTEND_ORIGINS:              '["http://localhost", "http://localhost:80", "http://127.0.0.1"]'
-      ACCESS_TOKEN_EXPIRE_MINUTES:   "1440"
+      DATABASE_URL:                 postgresql://curio_user:localdevpass@db:5432/curio_db
+      SECRET_KEY:                   local-dev-secret-change-in-production
+      DEBUG:                        "True"
+      ENVIRONMENT:                  development
+      FRONTEND_ORIGINS:             '["http://localhost","http://localhost:80","http://127.0.0.1"]'
+      ACCESS_TOKEN_EXPIRE_MINUTES:  "1440"
+      SMTP_HOST:                    smtp.gmail.com
+      SMTP_PORT:                    "587"
+      SMTP_USER:                    your@gmail.com
+      SMTP_PASS:                    your_app_password
+      EMAILS_FROM_NAME:             Curio
+      # PYTHONPATH so backend.app.* imports work inside the container
+      PYTHONPATH:                   /app
     ports:
-      - "8000:8000"       # API accessible at http://localhost:8000
+      - "8000:8000"
     volumes:
-      - ./backend:/app    # hot-reload: code changes reflected immediately
+      # Mount entire project root as /app so backend.app.* resolves
+      - .:/app
+      - ./static:/app/static
+    working_dir: /app
     command: >
-      sh -c "alembic -c /app/../alembic.ini upgrade head &&
-             python -m app.seed &&
-             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+      sh -c "alembic -c /app/alembic.ini upgrade head &&
+             python -m backend.app.seed &&
+             uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload"
 
-  # ── Nginx (serves frontend + proxies /api to backend) ────────
+  # ── Nginx ───────────────────────────────────────────────────
   nginx:
     image: nginx:1.25-alpine
-    container_name: cloudquiz_nginx
+    container_name: curio_nginx
     restart: unless-stopped
     depends_on:
       - backend
@@ -63,6 +156,7 @@ services:
       - "80:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
+      - ./static:/usr/share/nginx/static:ro
       - ./nginx/cloudquiz.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
