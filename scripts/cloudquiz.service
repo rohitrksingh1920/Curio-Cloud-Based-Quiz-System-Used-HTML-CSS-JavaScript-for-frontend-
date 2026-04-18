@@ -1,133 +1,82 @@
-# /etc/systemd/system/cloudquiz.service
-#
-# Manages the Cloud Quiz FastAPI/Gunicorn process.
-# Commands:
-#   sudo systemctl start   cloudquiz
-#   sudo systemctl stop    cloudquiz
-#   sudo systemctl restart cloudquiz
-#   sudo systemctl status  cloudquiz
-#   sudo journalctl -u cloudquiz -f          # live logs
-# ─────────────────────────────────────────────────────────────
-
-#[Unit]
-#Description=Cloud Quiz FastAPI Application
-#After=network.target postgresql.service
-#Wants=postgresql.service
-
-#[Service]
-#Type=notify
-
-# Run as the ubuntu user (not root)
-#User=ubuntu
-#Group=ubuntu
-
-# Working directory — adjust if you deploy elsewhere
-#WorkingDirectory=/home/ubuntu/cloud_quiz/backend
-
-# Load .env automatically
-#EnvironmentFile=/home/ubuntu/cloud_quiz/backend/.env
-
-# Gunicorn with Uvicorn workers
-#   -w 2  →  2 × (2 × CPU cores + 1) is a common starting point
-#            For a t3.micro (1 vCPU) use -w 2
-#            For a t3.small/medium (2 vCPU) use -w 4
-#ExecStart=/home/ubuntu/cloud_quiz/venv/bin/gunicorn app.main:app \
-#    --worker-class uvicorn.workers.UvicornWorker \
-#    --workers 2 \
-#    --bind 127.0.0.1:8000 \
-#    --timeout 120 \
-#    --keep-alive 5 \
-#    --log-level info \
-#    --access-logfile /var/log/cloudquiz/access.log \
-#    --error-logfile  /var/log/cloudquiz/error.log
-
-# Graceful reload on SIGHUP (used by systemctl reload)
-#ExecReload=/bin/kill -s HUP $MAINPID
-
-# Restart policy
-#Restart=on-failure
-#RestartSec=5s
-
-# File descriptor limits
-#LimitNOFILE=65536
-
-#[Install]
-#WantedBy=multi-user.target
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# /etc/systemd/system/curio.service
-#
-# Manages the Curio FastAPI application via Gunicorn + Uvicorn workers.
-#
-# Commands:
-#   sudo systemctl start   curio
-#   sudo systemctl stop    curio
-#   sudo systemctl restart curio
-#   sudo systemctl reload  curio       ← graceful reload (zero-downtime)
-#   sudo systemctl status  curio
-#   sudo journalctl -u curio -f        ← live logs
 
 [Unit]
-Description=Curio Cloud Quiz — FastAPI Application
+Description=Curio Cloud Quiz — FastAPI/Gunicorn Application
+Documentation=https://github.com/rohitrk/curio
 After=network.target postgresql.service
 Wants=postgresql.service
 
 [Service]
 Type=notify
 
-# Run as the ubuntu user (never root)
+# ── Runtime user ─────────────────────────────────────────────
+# Never run as root
 User=ubuntu
 Group=ubuntu
 
-# !! CRITICAL: WorkingDirectory must be the project ROOT (THE2/ equivalent)
-# so that Python resolves  backend.app.*  imports correctly.
+# ── Working directory ─────────────────────────────────────────
+# MUST be project root (THE2/ equivalent) so backend.app.* imports resolve
 WorkingDirectory=/home/ubuntu/curio
 
-# Load .env automatically into the process environment
+# ── Environment ───────────────────────────────────────────────
+# Load .env file (pydantic-settings also reads this, but systemd loads it too
+# so gunicorn subprocess has all vars available)
 EnvironmentFile=/home/ubuntu/curio/backend/.env
 
-# Add the project root to PYTHONPATH so  backend.app.*  imports work
+# PYTHONPATH: lets Python find backend.app.* from the project root
 Environment=PYTHONPATH=/home/ubuntu/curio
 
-# Gunicorn with Uvicorn workers
-#   -w 2 → good for t3.micro (1 vCPU)
-#   -w 4 → better for t3.small/medium (2 vCPU)
+# ── Gunicorn command ──────────────────────────────────────────
+# Worker count guidance:
+#   t3.micro  (1 vCPU,  1 GB RAM) → -w 2
+#   t3.small  (2 vCPU,  2 GB RAM) → -w 4
+#   t3.medium (2 vCPU,  4 GB RAM) → -w 4
+#   t3.large  (2 vCPU,  8 GB RAM) → -w 5
 #
-# Module path: backend.app.main:app
-# (matches:  uvicorn backend.app.main:app --reload  used in development)
+# Module: backend.app.main:app
+# Matches development command: uvicorn backend.app.main:app --reload
 ExecStart=/home/ubuntu/curio/venv/bin/gunicorn backend.app.main:app \
-    --worker-class uvicorn.workers.UvicornWorker \
-    --workers 2 \
-    --bind 127.0.0.1:8000 \
-    --timeout 120 \
-    --keep-alive 5 \
-    --log-level info \
-    --access-logfile /var/log/curio/access.log \
-    --error-logfile  /var/log/curio/error.log
+    --worker-class  uvicorn.workers.UvicornWorker \
+    --workers       2 \
+    --bind          127.0.0.1:8000 \
+    --timeout       120 \
+    --keep-alive    5 \
+    --max-requests  1000 \
+    --max-requests-jitter 50 \
+    --log-level     info \
+    --access-logfile  /var/log/curio/access.log \
+    --error-logfile   /var/log/curio/error.log \
+    --capture-output
 
-# Graceful reload on SIGHUP — used by  systemctl reload curio
+# ── Graceful reload (used by: systemctl reload curio) ─────────
+# Sends SIGHUP to Gunicorn master — workers drain in-flight
+# requests before restarting (true zero-downtime)
 ExecReload=/bin/kill -s HUP $MAINPID
 
-# Restart on crash, but not on clean stop
+# ── Restart policy ────────────────────────────────────────────
 Restart=on-failure
 RestartSec=5s
+StartLimitIntervalSec=60
+StartLimitBurst=3
 
-# Allow large numbers of open files (needed for many concurrent connections)
+# ── Resource limits ───────────────────────────────────────────
 LimitNOFILE=65536
+LimitNPROC=4096
+
+# ── Security hardening ────────────────────────────────────────
+# Prevent privilege escalation
+NoNewPrivileges=true
+# Restrict what the process can write to (except /home/ubuntu/curio and /var/log/curio)
+ProtectSystem=full
+# Keep /home readable so the app can access its own files
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/curio/static /var/log/curio /tmp
+# Prevent access to /dev devices
+PrivateDevices=true
+# Isolate temp files per service
+PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target

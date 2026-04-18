@@ -1,66 +1,39 @@
-# # Web framework
-# fastapi==0.111.0
-# uvicorn[standard]==0.29.0
-
-# # Database — PostgreSQL
-# sqlalchemy==2.0.30
-# alembic==1.13.1
-# psycopg2-binary==2.9.9          # PostgreSQL adapter
-
-# # Auth / Security
-# python-jose[cryptography]==3.3.0
-# passlib[bcrypt]==1.7.4
-# python-multipart==0.0.9
-
-# # Validation / Settings
-# pydantic[email]==2.7.1
-# pydantic-settings==2.2.1
-
-# # HTTP client (tests / health checks)
-# httpx==0.27.0
-
-# # Production WSGI/ASGI process manager
-# gunicorn==22.0.0
 
 
-
-
-
-
-
-
-
-
-
-# Curio Cloud Quiz — Python dependencies
-# Install: pip install -r requirements.txt
-
-# ── Web framework ──────────────────────────────────────────────
+# ── Web framework ──────────────────────────────────────────────────────────
 fastapi==0.111.0
-uvicorn[standard]==0.29.0
-gunicorn==21.2.0              # production WSGI/ASGI server
+uvicorn[standard]==0.29.0        # includes websockets, watchfiles, httptools
+gunicorn==21.2.0                 # production process manager
 
-# ── Database ───────────────────────────────────────────────────
-sqlalchemy==2.0.30
-psycopg2-binary==2.9.9        # PostgreSQL driver (binary = no compile needed)
-alembic==1.13.1               # database migrations
+# ── ASGI / HTTP ────────────────────────────────────────────────────────────
+httptools==0.6.1                 # fast HTTP parser (used by uvicorn[standard])
+uvloop==0.19.0                   # fast event loop (used by uvicorn[standard])
 
-# ── Auth / security ────────────────────────────────────────────
-python-jose[cryptography]==3.3.0   # JWT tokens
-passlib[bcrypt]==1.7.4             # password hashing
-python-multipart==0.0.9            # form data (OAuth2PasswordRequestForm)
+# ── Database ───────────────────────────────────────────────────────────────
+sqlalchemy==2.0.30               # ORM
+psycopg2-binary==2.9.9           # PostgreSQL driver (binary = no compile needed)
+alembic==1.13.1                  # schema migrations
 
-# ── Config ────────────────────────────────────────────────────
-pydantic==2.7.1
-pydantic-settings==2.2.1      # Settings with .env support
-python-dotenv==1.0.1
+# ── Auth / Security ────────────────────────────────────────────────────────
+python-jose[cryptography]==3.3.0 # JWT encoding/decoding
+passlib[bcrypt]==1.7.4           # password hashing (bcrypt)
+python-multipart==0.0.9          # multipart form data + file uploads (UploadFile)
 
-# ── Email (OTP / password reset) ──────────────────────────────
-# Uses stdlib smtplib — no extra package needed
+# ── Configuration ──────────────────────────────────────────────────────────
+pydantic==2.7.1                  # data validation (FastAPI uses this internally)
+pydantic-settings==2.2.1         # Settings class with .env file support
+python-dotenv==1.0.1             # .env loader (backup to pydantic-settings)
+email-validator==2.1.1           # validates EmailStr fields in Pydantic schemas
 
-# ── File uploads (avatar) ─────────────────────────────────────
-python-multipart==0.0.9       # already listed above, just noting it enables UploadFile
+# ── Email (OTP / password reset) ───────────────────────────────────────────
+# Uses Python stdlib smtplib — no extra package needed.
+# SMTP config in backend/.env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
 
-# ── Utilities ─────────────────────────────────────────────────
-httpx==0.27.0                 # optional: for testing async endpoints
-email-validator==2.1.1        # validates EmailStr in Pydantic schemas
+# ── Utilities ──────────────────────────────────────────────────────────────
+anyio==4.3.0                     # async compatibility layer
+starlette==0.37.2                # FastAPI dependency (keep pinned with fastapi)
+
+# ── Dev / Testing (comment out in production if desired) ───────────────────
+# httpx==0.27.0                  # async HTTP client for testing
+# pytest==8.2.0
+# pytest-asyncio==0.23.6

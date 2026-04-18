@@ -3,34 +3,469 @@
 
 
 
+# from fastapi import APIRouter, Depends, HTTPException, status, Query
+# from sqlalchemy.orm import Session
+# from typing import Optional
+# from datetime import datetime, timezone, timedelta
+
+# from backend.app.core.database import get_db
+# from backend.app.core.security import get_current_user
+# from backend.app.models.user import User
+# from backend.app.models.quiz import Quiz, Question, QuestionOption, QuizStatus, QuizCategory
+# from backend.app.models.attempt import QuizAttempt, AttemptAnswer
+# from backend.app.models.notification import Notification, NotificationType
+# from backend.app.schemas.quiz import (
+#     QuizCreate, QuizUpdate, QuizSummary, QuizDetail, QuizPublic
+# )
+# from backend.app.schemas.misc import AttemptSubmit, AttemptResult
+
+# router = APIRouter(prefix="/api/quizzes", tags=["Quiz"])
+
+
+# #  Create 
+
+# @router.post("", response_model=QuizDetail, status_code=status.HTTP_201_CREATED)
+# def create_quiz(
+#     payload: QuizCreate,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     """Create a new quiz with questions and options."""
+#     new_quiz = Quiz(
+#         title=payload.title,
+#         category=payload.category,
+#         duration_mins=payload.duration_mins,
+#         total_points=payload.total_points,
+#         scheduled_date=payload.scheduled_date,
+#         scheduled_time=payload.scheduled_time,
+#         status=QuizStatus.upcoming if payload.scheduled_date else QuizStatus.active,
+#         creator_id=current_user.id,
+#     )
+#     db.add(new_quiz)
+#     db.flush()
+
+#     for q_data in payload.questions:
+#         question = Question(
+#             quiz_id=new_quiz.id,
+#             text=q_data.text,
+#             order=q_data.order,
+#         )
+#         db.add(question)
+#         db.flush()
+
+#         for opt_data in q_data.options:
+#             option = QuestionOption(
+#                 question_id=question.id,
+#                 text=opt_data.text,
+#                 is_correct=opt_data.is_correct,
+#                 order=opt_data.order,
+#             )
+#             db.add(option)
+
+#     db.commit()
+#     db.refresh(new_quiz)
+#     return _to_quiz_detail(new_quiz)
+
+
+# #  List / Filter 
+# # FIX 1: Changed @router.get("/") to @router.get("") to remove trailing slash.
+# # The old "/" caused FastAPI to issue a 307 redirect for requests to /api/quizzes
+# # which stripped the Authorization header, causing silent 401s and empty lists.
+# #
+# # FIX 2: Now returns ALL quizzes (not just creator's) so students see quizzes too.
+# # Quizzes created by others are shown only if not yet completed by this user.
+
+# @router.get("", response_model=list[QuizSummary])
+# def list_my_quizzes(
+#     search: Optional[str] = Query(None),
+#     status_filter: Optional[str] = Query(None, alias="status"),
+#     current_user: User = Depends(get_current_user),
+#     db: Session = Depends(get_db),
+# ):
+#     """
+#     Return all quizzes visible to the current user.
+#     - Quizzes they CREATED (always shown)
+#     - Quizzes created by others (shown so students can see them too)
+#     Status is computed in real-time from scheduled datetime + attempt state.
+#     Optional ?status= filter applies after computing status.
+#     """
+#     query = db.query(Quiz)
+
+#     if search:
+#         term = f"%{search.lower()}%"
+#         query = query.filter(
+#             Quiz.title.ilike(term) | Quiz.category.ilike(term)
+#         )
+
+#     quizzes   = query.order_by(Quiz.created_at.desc()).all()
+#     summaries = [_to_quiz_summary(q, current_user.id) for q in quizzes]
+
+#     if status_filter:
+#         summaries = [s for s in summaries if s.status.value == status_filter.lower()]
+
+#     return summaries
+
+
+# #  Get Single 
+
+# @router.get("/{quiz_id}", response_model=QuizDetail)
+# def get_quiz(
+#     quiz_id: int,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     """Get full quiz detail (creator only)."""
+#     quiz = _get_quiz_or_404(quiz_id, db)
+#     if quiz.creator_id != current_user.id:
+#         raise HTTPException(status_code=403, detail="Not your quiz")
+#     return _to_quiz_detail(quiz)
+
+
+# #  Take Quiz 
+
+# @router.get("/{quiz_id}/take", response_model=QuizPublic)
+# def take_quiz(
+#     quiz_id: int,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     """
+#     Return quiz questions for a student to answer.
+#     Blocks if: quiz hasn't started yet, or user already completed it.
+#     Auto-closes timed-out incomplete attempts.
+#     """
+#     quiz = _get_quiz_or_404(quiz_id, db)
+#     now  = datetime.now(timezone.utc)
+
+#     quiz_datetime = None
+#     if quiz.scheduled_date:
+#         quiz_datetime = datetime.combine(
+#             quiz.scheduled_date,
+#             quiz.scheduled_time or datetime.min.time(),
+#         ).replace(tzinfo=timezone.utc)
+
+#     if quiz_datetime and now < quiz_datetime:
+#         raise HTTPException(
+#             status_code=403,
+#             detail=f"Quiz not yet available. Starts at {quiz_datetime.isoformat()}",
+#         )
+
+#     existing_attempt = (
+#         db.query(QuizAttempt)
+#         .filter(QuizAttempt.user_id == current_user.id, QuizAttempt.quiz_id == quiz.id)
+#         .order_by(QuizAttempt.started_at.desc())
+#         .first()
+#     )
+
+#     if existing_attempt:
+#         if existing_attempt.is_completed:
+#             raise HTTPException(status_code=400, detail="You have already completed this quiz")
+
+#         end_time = existing_attempt.started_at + timedelta(minutes=quiz.duration_mins)
+#         if now > end_time:
+#             existing_attempt.is_completed = True
+#             existing_attempt.completed_at = now
+#             db.commit()
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail="Your previous attempt timed out and has been closed",
+#             )
+#         else:
+#             raise HTTPException(
+#                 status_code=400,
+#                 detail="You already have an active attempt for this quiz",
+#             )
+
+#     attempt = QuizAttempt(user_id=current_user.id, quiz_id=quiz.id, started_at=now)
+#     db.add(attempt)
+#     db.commit()
+#     db.refresh(attempt)
+
+#     return QuizPublic(
+#         id=quiz.id,
+#         title=quiz.title,
+#         category=quiz.category,
+#         duration_mins=quiz.duration_mins,
+#         total_points=quiz.total_points,
+#         questions=[
+#             {
+#                 "id": q.id,
+#                 "text": q.text,
+#                 "order": q.order,
+#                 "options": [
+#                     {"id": o.id, "text": o.text, "order": o.order}
+#                     for o in sorted(q.options, key=lambda x: x.order)
+#                 ],
+#             }
+#             for q in sorted(quiz.questions, key=lambda x: x.order)
+#         ],
+#     )
+
+
+# #  Submit Attempt 
+
+# @router.post("/{quiz_id}/submit", response_model=AttemptResult)
+# def submit_quiz(
+#     quiz_id: int,
+#     payload: AttemptSubmit,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     """Submit answers and receive the scored result."""
+#     quiz = _get_quiz_or_404(quiz_id, db)
+
+#     attempt = (
+#         db.query(QuizAttempt)
+#         .filter(
+#             QuizAttempt.user_id == current_user.id,
+#             QuizAttempt.quiz_id == quiz_id,
+#             QuizAttempt.is_completed == False,
+#         )
+#         .order_by(QuizAttempt.started_at.desc())
+#         .first()
+#     )
+
+#     if not attempt:
+#         raise HTTPException(
+#             status_code=400,
+#             detail="No active attempt found. You may have already submitted.",
+#         )
+
+#     now = datetime.now(timezone.utc)
+
+#     correct_map: dict[int, int] = {}
+#     for q in quiz.questions:
+#         for opt in q.options:
+#             if opt.is_correct:
+#                 correct_map[q.id] = opt.id
+
+#     correct_count = 0
+#     for ans in payload.answers:
+#         is_correct = correct_map.get(ans.question_id) == ans.selected_option_id
+#         if is_correct:
+#             correct_count += 1
+#         db.add(AttemptAnswer(
+#             attempt_id=attempt.id,
+#             question_id=ans.question_id,
+#             selected_option_id=ans.selected_option_id,
+#             is_correct=is_correct,
+#         ))
+
+#     total_questions = len(quiz.questions)
+#     score_pct = round((correct_count / total_questions) * 100, 2) if total_questions else 0
+#     raw_score = round((score_pct / 100) * quiz.total_points, 2)
+#     passed    = score_pct >= 60
+
+#     attempt.score        = raw_score
+#     attempt.score_pct    = score_pct
+#     attempt.is_completed = True
+#     attempt.completed_at = now
+
+#     if score_pct == 100:
+#         db.add(Notification(
+#             user_id=current_user.id,
+#             type=NotificationType.achievement,
+#             title="🏆 Perfect Score!",
+#             message=f"You scored 100% on '{quiz.title}'. Outstanding!",
+#         ))
+
+#     db.commit()
+#     db.refresh(attempt)
+
+#     return AttemptResult(
+#         attempt_id=attempt.id,
+#         quiz_title=quiz.title,
+#         score=raw_score,
+#         score_pct=score_pct,
+#         total_points=quiz.total_points,
+#         correct_count=correct_count,
+#         total_questions=total_questions,
+#         passed=passed,
+#         completed_at=attempt.completed_at,
+#     )
+
+
+# #  Update 
+
+# @router.patch("/{quiz_id}", response_model=QuizSummary)
+# def update_quiz(
+#     quiz_id: int,
+#     payload: QuizUpdate,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     quiz = _get_quiz_or_404(quiz_id, db)
+#     if quiz.creator_id != current_user.id:
+#         raise HTTPException(status_code=403, detail="Not your quiz")
+
+#     for field, value in payload.model_dump(exclude_none=True).items():
+#         setattr(quiz, field, value)
+
+#     db.commit()
+#     db.refresh(quiz)
+#     return _to_quiz_summary(quiz, current_user.id)
+
+
+# #  Delete 
+
+# @router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
+# def delete_quiz(
+#     quiz_id: int,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     quiz = _get_quiz_or_404(quiz_id, db)
+#     if quiz.creator_id != current_user.id:
+#         raise HTTPException(status_code=403, detail="Not your quiz")
+
+#     db.delete(quiz)
+#     db.commit()
+
+
+# #  Internal helpers 
+
+# def _get_quiz_or_404(quiz_id: int, db: Session) -> Quiz:
+#     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
+#     if not quiz:
+#         raise HTTPException(status_code=404, detail="Quiz not found")
+#     return quiz
+
+
+# def _to_quiz_summary(quiz: Quiz, current_user_id: int) -> QuizSummary:
+#     """
+#     Compute real-time status:
+#       1. User has a completed attempt  → completed
+#       2. Scheduled datetime is future  → upcoming
+#       3. Anything else                 → active
+#     """
+#     now = datetime.now(timezone.utc)
+
+#     quiz_datetime = None
+#     if quiz.scheduled_date:
+#         quiz_datetime = datetime.combine(
+#             quiz.scheduled_date,
+#             quiz.scheduled_time or datetime.min.time(),
+#         ).replace(tzinfo=timezone.utc)
+
+#     user_attempt = next(
+#         (a for a in (quiz.attempts or []) if a.user_id == current_user_id and a.is_completed),
+#         None,
+#     )
+
+#     if user_attempt:
+#         computed_status = QuizStatus.completed
+#     elif quiz_datetime and now < quiz_datetime:
+#         computed_status = QuizStatus.upcoming
+#     else:
+#         computed_status = QuizStatus.active
+
+#     return QuizSummary(
+#         id=quiz.id,
+#         title=quiz.title,
+#         category=quiz.category,
+#         status=computed_status,
+#         duration_mins=quiz.duration_mins,
+#         total_points=quiz.total_points,
+#         scheduled_date=quiz.scheduled_date,
+#         scheduled_time=quiz.scheduled_time,
+#         enrolled_count=len(quiz.attempts or []),
+#         creator_name=quiz.creator.full_name if quiz.creator else "Unknown",
+#         created_at=quiz.created_at,
+#         is_attempted=bool(user_attempt),
+#     )
+
+
+# def _to_quiz_detail(quiz: Quiz) -> QuizDetail:
+#     return QuizDetail(
+#         id=quiz.id,
+#         title=quiz.title,
+#         category=quiz.category,
+#         status=quiz.status,
+#         duration_mins=quiz.duration_mins,
+#         total_points=quiz.total_points,
+#         scheduled_date=quiz.scheduled_date,
+#         scheduled_time=quiz.scheduled_time,
+#         enrolled_count=len(quiz.attempts or []),
+#         creator_name=quiz.creator.full_name if quiz.creator else "Unknown",
+#         created_at=quiz.created_at,
+#         questions=[
+#             {
+#                 "id": q.id,
+#                 "text": q.text,
+#                 "order": q.order,
+#                 "options": [
+#                     {"id": o.id, "text": o.text, "is_correct": o.is_correct, "order": o.order}
+#                     for o in sorted(q.options, key=lambda x: x.order)
+#                 ],
+#             }
+#             for q in sorted(quiz.questions, key=lambda x: x.order)
+#         ],
+#     )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+backend/app/routers/quiz.py
+
+RBAC rules enforced here:
+  - Create / edit / delete quiz  → teacher or admin only
+  - Enroll students              → teacher or admin only (POST /{id}/enroll)
+  - Remove enrollment            → teacher or admin only (DELETE /{id}/enroll/{user_id})
+  - List enrolled students       → teacher or admin only (GET /{id}/students)
+  - List quizzes                 → everyone, BUT:
+      · teacher/admin → all quizzes they created
+      · student       → only quizzes they are enrolled in
+  - Take / submit quiz           → student must be enrolled
+"""
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, timezone, timedelta
 
 from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models.user import User
-from backend.app.models.quiz import Quiz, Question, QuestionOption, QuizStatus, QuizCategory
+from backend.app.core.security import get_current_user, require_teacher
+from backend.app.models.user import User, UserRole
+from backend.app.models.quiz import Quiz, Question, QuestionOption, QuizStatus, QuizEnrollment
 from backend.app.models.attempt import QuizAttempt, AttemptAnswer
 from backend.app.models.notification import Notification, NotificationType
 from backend.app.schemas.quiz import (
     QuizCreate, QuizUpdate, QuizSummary, QuizDetail, QuizPublic
 )
-from backend.app.schemas.misc import AttemptSubmit, AttemptResult
+from backend.app.schemas.misc import AttemptSubmit, AttemptResult, EnrollRequest, EnrollResponse
 
 router = APIRouter(prefix="/api/quizzes", tags=["Quiz"])
 
 
-#  Create 
+# ── Create ────────────────────────────────────────────────────────────────────
 
 @router.post("", response_model=QuizDetail, status_code=status.HTTP_201_CREATED)
 def create_quiz(
     payload: QuizCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_teacher),   # ← RBAC: teacher/admin only
 ):
-    """Create a new quiz with questions and options."""
+    """Create a quiz. Teacher and Admin only."""
     new_quiz = Quiz(
         title=payload.title,
         category=payload.category,
@@ -45,57 +480,49 @@ def create_quiz(
     db.flush()
 
     for q_data in payload.questions:
-        question = Question(
-            quiz_id=new_quiz.id,
-            text=q_data.text,
-            order=q_data.order,
-        )
+        question = Question(quiz_id=new_quiz.id, text=q_data.text, order=q_data.order)
         db.add(question)
         db.flush()
-
         for opt_data in q_data.options:
-            option = QuestionOption(
+            db.add(QuestionOption(
                 question_id=question.id,
                 text=opt_data.text,
                 is_correct=opt_data.is_correct,
                 order=opt_data.order,
-            )
-            db.add(option)
+            ))
 
     db.commit()
     db.refresh(new_quiz)
     return _to_quiz_detail(new_quiz)
 
 
-#  List / Filter 
-# FIX 1: Changed @router.get("/") to @router.get("") to remove trailing slash.
-# The old "/" caused FastAPI to issue a 307 redirect for requests to /api/quizzes
-# which stripped the Authorization header, causing silent 401s and empty lists.
-#
-# FIX 2: Now returns ALL quizzes (not just creator's) so students see quizzes too.
-# Quizzes created by others are shown only if not yet completed by this user.
+# ── List quizzes (role-aware) ─────────────────────────────────────────────────
 
-@router.get("", response_model=list[QuizSummary])
-def list_my_quizzes(
+@router.get("", response_model=List[QuizSummary])
+def list_quizzes(
     search: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Return all quizzes visible to the current user.
-    - Quizzes they CREATED (always shown)
-    - Quizzes created by others (shown so students can see them too)
-    Status is computed in real-time from scheduled datetime + attempt state.
-    Optional ?status= filter applies after computing status.
+    RBAC:
+      Teacher / Admin → all quizzes they created.
+      Student         → only quizzes they are enrolled in.
     """
-    query = db.query(Quiz)
+    if current_user.role in (UserRole.admin, UserRole.teacher):
+        # Teachers/admins see their own created quizzes
+        query = db.query(Quiz).filter(Quiz.creator_id == current_user.id)
+    else:
+        # Students see ONLY quizzes they are enrolled in
+        enrolled_ids = [e.quiz_id for e in db.query(QuizEnrollment).filter(
+            QuizEnrollment.user_id == current_user.id
+        ).all()]
+        query = db.query(Quiz).filter(Quiz.id.in_(enrolled_ids))
 
     if search:
         term = f"%{search.lower()}%"
-        query = query.filter(
-            Quiz.title.ilike(term) | Quiz.category.ilike(term)
-        )
+        query = query.filter(Quiz.title.ilike(term) | Quiz.category.ilike(term))
 
     quizzes   = query.order_by(Quiz.created_at.desc()).all()
     summaries = [_to_quiz_summary(q, current_user.id) for q in quizzes]
@@ -106,7 +533,7 @@ def list_my_quizzes(
     return summaries
 
 
-#  Get Single 
+# ── Get single quiz ───────────────────────────────────────────────────────────
 
 @router.get("/{quiz_id}", response_model=QuizDetail)
 def get_quiz(
@@ -114,14 +541,122 @@ def get_quiz(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get full quiz detail (creator only)."""
     quiz = _get_quiz_or_404(quiz_id, db)
-    if quiz.creator_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not your quiz")
+    # Creator or admin can see full detail; enrolled students can too
+    if current_user.role in (UserRole.admin, UserRole.teacher):
+        if quiz.creator_id != current_user.id and current_user.role != UserRole.admin:
+            raise HTTPException(status_code=403, detail="Not your quiz")
+    else:
+        _require_enrollment(quiz_id, current_user.id, db)
     return _to_quiz_detail(quiz)
 
 
-#  Take Quiz 
+# ── Enroll students ───────────────────────────────────────────────────────────
+
+@router.post("/{quiz_id}/enroll", response_model=EnrollResponse)
+def enroll_students(
+    quiz_id: int,
+    payload: EnrollRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_teacher),   # ← RBAC: teacher/admin only
+):
+    """
+    Enroll one or more students in a quiz.
+    POST body: { "user_ids": [1, 2, 3] }
+    Only teacher (creator) or admin can enroll.
+    """
+    quiz = _get_quiz_or_404(quiz_id, db)
+    if quiz.creator_id != current_user.id and current_user.role != UserRole.admin:
+        raise HTTPException(status_code=403, detail="Not your quiz")
+
+    enrolled = []
+    already  = []
+    not_found = []
+
+    for uid in payload.user_ids:
+        student = db.query(User).filter(User.id == uid, User.role == UserRole.student).first()
+        if not student:
+            not_found.append(uid)
+            continue
+
+        existing = db.query(QuizEnrollment).filter(
+            QuizEnrollment.quiz_id == quiz_id,
+            QuizEnrollment.user_id == uid,
+        ).first()
+        if existing:
+            already.append(uid)
+            continue
+
+        db.add(QuizEnrollment(quiz_id=quiz_id, user_id=uid))
+        # Notify the student
+        db.add(Notification(
+            user_id=uid,
+            type=NotificationType.quiz_assigned,
+            title="New Quiz Assigned",
+            message=f"You have been enrolled in '{quiz.title}'. Good luck!",
+        ))
+        enrolled.append(uid)
+
+    db.commit()
+    return EnrollResponse(
+        enrolled=enrolled,
+        already_enrolled=already,
+        not_found=not_found,
+        message=f"{len(enrolled)} student(s) enrolled successfully.",
+    )
+
+
+@router.delete("/{quiz_id}/enroll/{user_id}", status_code=204)
+def remove_enrollment(
+    quiz_id: int,
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_teacher),
+):
+    """Remove a student's enrollment from a quiz."""
+    quiz = _get_quiz_or_404(quiz_id, db)
+    if quiz.creator_id != current_user.id and current_user.role != UserRole.admin:
+        raise HTTPException(status_code=403, detail="Not your quiz")
+
+    enrollment = db.query(QuizEnrollment).filter(
+        QuizEnrollment.quiz_id == quiz_id,
+        QuizEnrollment.user_id == user_id,
+    ).first()
+    if not enrollment:
+        raise HTTPException(status_code=404, detail="Enrollment not found")
+
+    db.delete(enrollment)
+    db.commit()
+
+
+@router.get("/{quiz_id}/students")
+def get_enrolled_students(
+    quiz_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_teacher),
+):
+    """List all students enrolled in a quiz. Teacher/admin only."""
+    quiz = _get_quiz_or_404(quiz_id, db)
+    if quiz.creator_id != current_user.id and current_user.role != UserRole.admin:
+        raise HTTPException(status_code=403, detail="Not your quiz")
+
+    enrollments = db.query(QuizEnrollment).filter(
+        QuizEnrollment.quiz_id == quiz_id
+    ).all()
+
+    return [
+        {
+            "user_id":    e.user_id,
+            "full_name":  e.user.full_name,
+            "email":      e.user.email,
+            "enrolled_at": e.enrolled_at,
+        }
+        for e in enrollments
+        if e.user
+    ]
+
+
+# ── Take quiz ─────────────────────────────────────────────────────────────────
 
 @router.get("/{quiz_id}/take", response_model=QuizPublic)
 def take_quiz(
@@ -130,13 +665,17 @@ def take_quiz(
     current_user: User = Depends(get_current_user),
 ):
     """
-    Return quiz questions for a student to answer.
-    Blocks if: quiz hasn't started yet, or user already completed it.
-    Auto-closes timed-out incomplete attempts.
+    Return questions. Student must be enrolled.
+    Teachers/admins can preview without enrollment.
     """
     quiz = _get_quiz_or_404(quiz_id, db)
     now  = datetime.now(timezone.utc)
 
+    # Students must be enrolled
+    if current_user.role == UserRole.student:
+        _require_enrollment(quiz_id, current_user.id, db)
+
+    # Block if quiz hasn't started yet
     quiz_datetime = None
     if quiz.scheduled_date:
         quiz_datetime = datetime.combine(
@@ -150,36 +689,27 @@ def take_quiz(
             detail=f"Quiz not yet available. Starts at {quiz_datetime.isoformat()}",
         )
 
-    existing_attempt = (
+    existing = (
         db.query(QuizAttempt)
         .filter(QuizAttempt.user_id == current_user.id, QuizAttempt.quiz_id == quiz.id)
         .order_by(QuizAttempt.started_at.desc())
         .first()
     )
 
-    if existing_attempt:
-        if existing_attempt.is_completed:
+    if existing:
+        if existing.is_completed:
             raise HTTPException(status_code=400, detail="You have already completed this quiz")
-
-        end_time = existing_attempt.started_at + timedelta(minutes=quiz.duration_mins)
+        end_time = existing.started_at + timedelta(minutes=quiz.duration_mins)
         if now > end_time:
-            existing_attempt.is_completed = True
-            existing_attempt.completed_at = now
+            existing.is_completed = True
+            existing.completed_at = now
             db.commit()
-            raise HTTPException(
-                status_code=400,
-                detail="Your previous attempt timed out and has been closed",
-            )
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail="You already have an active attempt for this quiz",
-            )
+            raise HTTPException(status_code=400, detail="Your previous attempt timed out")
+        raise HTTPException(status_code=400, detail="You already have an active attempt")
 
     attempt = QuizAttempt(user_id=current_user.id, quiz_id=quiz.id, started_at=now)
     db.add(attempt)
     db.commit()
-    db.refresh(attempt)
 
     return QuizPublic(
         id=quiz.id,
@@ -189,20 +719,16 @@ def take_quiz(
         total_points=quiz.total_points,
         questions=[
             {
-                "id": q.id,
-                "text": q.text,
-                "order": q.order,
-                "options": [
-                    {"id": o.id, "text": o.text, "order": o.order}
-                    for o in sorted(q.options, key=lambda x: x.order)
-                ],
+                "id": q.id, "text": q.text, "order": q.order,
+                "options": [{"id": o.id, "text": o.text, "order": o.order}
+                            for o in sorted(q.options, key=lambda x: x.order)],
             }
             for q in sorted(quiz.questions, key=lambda x: x.order)
         ],
     )
 
 
-#  Submit Attempt 
+# ── Submit ────────────────────────────────────────────────────────────────────
 
 @router.post("/{quiz_id}/submit", response_model=AttemptResult)
 def submit_quiz(
@@ -211,7 +737,6 @@ def submit_quiz(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Submit answers and receive the scored result."""
     quiz = _get_quiz_or_404(quiz_id, db)
 
     attempt = (
@@ -224,20 +749,12 @@ def submit_quiz(
         .order_by(QuizAttempt.started_at.desc())
         .first()
     )
-
     if not attempt:
-        raise HTTPException(
-            status_code=400,
-            detail="No active attempt found. You may have already submitted.",
-        )
+        raise HTTPException(status_code=400, detail="No active attempt found")
 
     now = datetime.now(timezone.utc)
-
-    correct_map: dict[int, int] = {}
-    for q in quiz.questions:
-        for opt in q.options:
-            if opt.is_correct:
-                correct_map[q.id] = opt.id
+    correct_map = {q.id: next((o.id for o in q.options if o.is_correct), None)
+                   for q in quiz.questions}
 
     correct_count = 0
     for ans in payload.answers:
@@ -252,9 +769,9 @@ def submit_quiz(
         ))
 
     total_questions = len(quiz.questions)
-    score_pct = round((correct_count / total_questions) * 100, 2) if total_questions else 0
-    raw_score = round((score_pct / 100) * quiz.total_points, 2)
-    passed    = score_pct >= 60
+    score_pct  = round((correct_count / total_questions) * 100, 2) if total_questions else 0
+    raw_score  = round((score_pct / 100) * quiz.total_points, 2)
+    passed     = score_pct >= 60
 
     attempt.score        = raw_score
     attempt.score_pct    = score_pct
@@ -271,58 +788,47 @@ def submit_quiz(
 
     db.commit()
     db.refresh(attempt)
-
     return AttemptResult(
-        attempt_id=attempt.id,
-        quiz_title=quiz.title,
-        score=raw_score,
-        score_pct=score_pct,
-        total_points=quiz.total_points,
-        correct_count=correct_count,
-        total_questions=total_questions,
-        passed=passed,
-        completed_at=attempt.completed_at,
+        attempt_id=attempt.id, quiz_title=quiz.title,
+        score=raw_score, score_pct=score_pct, total_points=quiz.total_points,
+        correct_count=correct_count, total_questions=total_questions,
+        passed=passed, completed_at=attempt.completed_at,
     )
 
 
-#  Update 
+# ── Update / Delete ───────────────────────────────────────────────────────────
 
 @router.patch("/{quiz_id}", response_model=QuizSummary)
 def update_quiz(
     quiz_id: int,
     payload: QuizUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_teacher),
 ):
     quiz = _get_quiz_or_404(quiz_id, db)
-    if quiz.creator_id != current_user.id:
+    if quiz.creator_id != current_user.id and current_user.role != UserRole.admin:
         raise HTTPException(status_code=403, detail="Not your quiz")
-
     for field, value in payload.model_dump(exclude_none=True).items():
         setattr(quiz, field, value)
-
     db.commit()
     db.refresh(quiz)
     return _to_quiz_summary(quiz, current_user.id)
 
 
-#  Delete 
-
-@router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{quiz_id}", status_code=204)
 def delete_quiz(
     quiz_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_teacher),
 ):
     quiz = _get_quiz_or_404(quiz_id, db)
-    if quiz.creator_id != current_user.id:
+    if quiz.creator_id != current_user.id and current_user.role != UserRole.admin:
         raise HTTPException(status_code=403, detail="Not your quiz")
-
     db.delete(quiz)
     db.commit()
 
 
-#  Internal helpers 
+# ── Internal helpers ──────────────────────────────────────────────────────────
 
 def _get_quiz_or_404(quiz_id: int, db: Session) -> Quiz:
     quiz = db.query(Quiz).filter(Quiz.id == quiz_id).first()
@@ -331,15 +837,21 @@ def _get_quiz_or_404(quiz_id: int, db: Session) -> Quiz:
     return quiz
 
 
-def _to_quiz_summary(quiz: Quiz, current_user_id: int) -> QuizSummary:
-    """
-    Compute real-time status:
-      1. User has a completed attempt  → completed
-      2. Scheduled datetime is future  → upcoming
-      3. Anything else                 → active
-    """
-    now = datetime.now(timezone.utc)
+def _require_enrollment(quiz_id: int, user_id: int, db: Session):
+    """Raise 403 if the student is not enrolled in this quiz."""
+    enrolled = db.query(QuizEnrollment).filter(
+        QuizEnrollment.quiz_id == quiz_id,
+        QuizEnrollment.user_id == user_id,
+    ).first()
+    if not enrolled:
+        raise HTTPException(
+            status_code=403,
+            detail="You are not enrolled in this quiz. Please contact your teacher.",
+        )
 
+
+def _to_quiz_summary(quiz: Quiz, current_user_id: int) -> QuizSummary:
+    now = datetime.now(timezone.utc)
     quiz_datetime = None
     if quiz.scheduled_date:
         quiz_datetime = datetime.combine(
@@ -360,39 +872,28 @@ def _to_quiz_summary(quiz: Quiz, current_user_id: int) -> QuizSummary:
         computed_status = QuizStatus.active
 
     return QuizSummary(
-        id=quiz.id,
-        title=quiz.title,
-        category=quiz.category,
-        status=computed_status,
-        duration_mins=quiz.duration_mins,
-        total_points=quiz.total_points,
-        scheduled_date=quiz.scheduled_date,
+        id=quiz.id, title=quiz.title, category=quiz.category,
+        status=computed_status, duration_mins=quiz.duration_mins,
+        total_points=quiz.total_points, scheduled_date=quiz.scheduled_date,
         scheduled_time=quiz.scheduled_time,
-        enrolled_count=len(quiz.attempts or []),
+        enrolled_count=len(quiz.enrollments or []),
         creator_name=quiz.creator.full_name if quiz.creator else "Unknown",
-        created_at=quiz.created_at,
-        is_attempted=bool(user_attempt),
+        created_at=quiz.created_at, is_attempted=bool(user_attempt),
     )
 
 
 def _to_quiz_detail(quiz: Quiz) -> QuizDetail:
     return QuizDetail(
-        id=quiz.id,
-        title=quiz.title,
-        category=quiz.category,
-        status=quiz.status,
-        duration_mins=quiz.duration_mins,
-        total_points=quiz.total_points,
-        scheduled_date=quiz.scheduled_date,
+        id=quiz.id, title=quiz.title, category=quiz.category,
+        status=quiz.status, duration_mins=quiz.duration_mins,
+        total_points=quiz.total_points, scheduled_date=quiz.scheduled_date,
         scheduled_time=quiz.scheduled_time,
-        enrolled_count=len(quiz.attempts or []),
+        enrolled_count=len(quiz.enrollments or []),
         creator_name=quiz.creator.full_name if quiz.creator else "Unknown",
         created_at=quiz.created_at,
         questions=[
             {
-                "id": q.id,
-                "text": q.text,
-                "order": q.order,
+                "id": q.id, "text": q.text, "order": q.order,
                 "options": [
                     {"id": o.id, "text": o.text, "is_correct": o.is_correct, "order": o.order}
                     for o in sorted(q.options, key=lambda x: x.order)
