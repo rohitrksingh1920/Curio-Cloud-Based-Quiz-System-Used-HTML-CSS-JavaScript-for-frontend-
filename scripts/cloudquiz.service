@@ -4,7 +4,7 @@
 
 [Unit]
 Description=Curio Cloud Quiz — FastAPI/Gunicorn Application
-Documentation=https://github.com/rohitrk/curio
+Documentation=https://github.com/rohitrksingh1920/Curio-Cloud-Based-Quiz-System
 After=network.target postgresql.service
 Wants=postgresql.service
 
