@@ -1,4 +1,7 @@
 
+
+
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -10,7 +13,7 @@ from backend.app.models.quiz import Quiz
 from backend.app.models.attempt import QuizAttempt, AttemptAnswer
 from backend.app.schemas.misc import LeaderboardResponse, LeaderboardEntry
 
-router = APIRouter(prefix="/api/leaderboard", tags=["Leaderboard"])
+router = APIRouter()
 
 
 @router.get("/{quiz_id}", response_model=LeaderboardResponse)

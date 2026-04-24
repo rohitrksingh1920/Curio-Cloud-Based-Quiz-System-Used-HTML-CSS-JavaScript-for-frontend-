@@ -1,3 +1,7 @@
+
+
+
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -8,7 +12,7 @@ from backend.app.models.user import User
 from backend.app.models.notification import Notification
 from backend.app.schemas.misc import NotificationOut, NotificationListResponse
 
-router = APIRouter(prefix="/api/notifications", tags=["Notifications"])
+router = APIRouter()
 
 
 @router.get("", response_model=NotificationListResponse)

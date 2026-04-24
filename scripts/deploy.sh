@@ -28,9 +28,9 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
 
 info()    { echo -e "${CYAN}>>> $*${NC}"; }
-success() { echo -e "${GREEN}✅  $*${NC}"; }
-warn()    { echo -e "${YELLOW}⚠️   $*${NC}"; }
-error()   { echo -e "${RED}❌  $*${NC}" >&2; }
+success() { echo -e "${GREEN}  $*${NC}"; }
+warn()    { echo -e "${YELLOW}   $*${NC}"; }
+error()   { echo -e "${RED}  $*${NC}" >&2; }
 step()    { echo -e "\n${BOLD}[${1}/${TOTAL_STEPS}] ${2}${NC}"; }
 
 TOTAL_STEPS=11
@@ -289,7 +289,7 @@ cd "$APP_DIR"
 SEED_RESULT=$("$VENV/bin/python" -m backend.app.seed 2>&1) || true
 if echo "$SEED_RESULT" | grep -q "already seeded\|Skipping"; then
     warn "Database already seeded — skipping"
-elif echo "$SEED_RESULT" | grep -q "complete\|✅"; then
+elif echo "$SEED_RESULT" | grep -q "complete\|"; then
     success "Demo data seeded"
 else
     warn "Seed output: $SEED_RESULT"
@@ -368,7 +368,7 @@ fi
 # ─────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}${BOLD}============================================================${NC}"
-echo -e "${GREEN}${BOLD}  ✅  Deployment complete!  $(date)${NC}"
+echo -e "${GREEN}${BOLD}    Deployment complete!  $(date)${NC}"
 echo -e "${GREEN}${BOLD}============================================================${NC}"
 echo ""
 echo -e "  ${BOLD}Application URL${NC}  : http://${EC2_PUBLIC_IP}"

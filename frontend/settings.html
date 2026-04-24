@@ -14,7 +14,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <style>
-      /*  Settings Layout  */
+      /* ── Settings Layout ── */
       .settings-container {
         display: flex;
         gap: 32px;
@@ -82,7 +82,7 @@
         margin-bottom: 24px;
       }
 
-      /*  Avatar  */
+      /* ── Avatar ── */
       .profile-header {
         display: flex;
         align-items: center;
@@ -112,6 +112,7 @@
         height: 100%;
         object-fit: cover;
         border-radius: var(--radius-md);
+        display: block;
       }
       .avatar-edit-btn {
         position: absolute;
@@ -154,7 +155,7 @@
         gap: 6px;
       }
 
-      /*  Form  */
+      /* ── Form ── */
       .form-group {
         margin-bottom: 24px;
       }
@@ -186,7 +187,7 @@
         margin-top: 4px;
       }
 
-      /*  Preferences  */
+      /* ── Preferences ── */
       .preferences-header {
         font-size: 15px;
         font-weight: 700;
@@ -231,7 +232,7 @@
         margin: 0;
       }
 
-      /*  Toggle  */
+      /* ── Toggle ── */
       .toggle-switch {
         position: relative;
         display: inline-block;
@@ -286,7 +287,7 @@
         border-radius: 8px;
       }
 
-      /*  OTP step bar  */
+      /* ── OTP step bar ── */
       .step-bar {
         display: flex;
         align-items: center;
@@ -372,7 +373,40 @@
         font-weight: 600;
       }
 
-      /*  Notification items  */
+      /* ── SMTP warning banner ── */
+      .smtp-warning {
+        background: #fff8e6;
+        border: 1px solid #f59e0b;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        display: none;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .smtp-warning.show {
+        display: flex;
+      }
+      .smtp-warning i {
+        font-size: 20px;
+        color: #f59e0b;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .smtp-warning-text p {
+        font-size: 13px;
+        color: #78350f;
+        line-height: 1.6;
+        margin: 0;
+      }
+      .smtp-warning-text strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+        color: #92400e;
+      }
+
+      /* ── Notifications ── */
       .notification-item {
         display: flex;
         justify-content: space-between;
@@ -393,6 +427,12 @@
         font-size: 13px;
         color: var(--text-light);
         margin: 0;
+      }
+
+      @keyframes cqSpin {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -440,8 +480,8 @@
       <main class="main-content">
         <header class="top-header">
           <div class="search-bar">
-            <i class="ri-search-line"></i
-            ><input
+            <i class="ri-search-line"></i>
+            <input
               type="text"
               placeholder="Search quizzes, subjects, or students..."
             />
@@ -453,14 +493,15 @@
             <a
               href="create-quiz.html"
               class="btn btn-primary d-flex align-center gap-2"
-              ><i class="ri-add-line"></i> Create New Quiz</a
             >
+              <i class="ri-add-line"></i> Create New Quiz
+            </a>
           </div>
         </header>
 
         <div class="main-scroll-area">
           <div class="settings-container">
-            <!-- Left nav -->
+            <!-- ── Left nav ── -->
             <div class="settings-nav">
               <div class="settings-nav-item active" data-tab="tab-profile">
                 <i class="ri-user-line"></i> Profile
@@ -474,7 +515,7 @@
             </div>
 
             <div class="settings-content">
-              <!--  PROFILE  -->
+              <!-- ══ PROFILE ══════════════════════════════════════════════ -->
               <div id="tab-profile" class="settings-section active">
                 <h2>Profile</h2>
                 <div class="settings-card">
@@ -521,6 +562,7 @@
                         type="text"
                         id="pf-name"
                         placeholder="Your full name"
+                        maxlength="100"
                       />
                     </div>
                     <div class="form-group">
@@ -592,10 +634,24 @@
                 </div>
               </div>
 
-              <!--  SECURITY  -->
+              <!-- ══ SECURITY ════════════════════════════════════════════ -->
               <div id="tab-security" class="settings-section">
                 <h2>Security</h2>
                 <div class="settings-card">
+                  <!-- SMTP warning — shown when email service is not configured -->
+                  <div class="smtp-warning" id="smtp-warning">
+                    <i class="ri-error-warning-line"></i>
+                    <div class="smtp-warning-text">
+                      <strong>Email service not configured</strong>
+                      <p id="smtp-warning-text">
+                        OTP email cannot be sent because SMTP is not set up.
+                        Please use the <strong>Change Password</strong> card
+                        below instead, or configure SMTP_USER and SMTP_PASS in
+                        your docker-compose.yml.
+                      </p>
+                    </div>
+                  </div>
+
                   <div class="step-bar">
                     <div class="step-dot active" id="sdot-1">1</div>
                     <div class="step-line" id="sline-1"></div>
@@ -662,6 +718,8 @@
                           id="otp-input"
                           maxlength="6"
                           placeholder="• • • • • •"
+                          inputmode="numeric"
+                          autocomplete="one-time-code"
                         />
                         <button
                           id="resend-otp-btn"
@@ -700,7 +758,7 @@
                         margin-bottom: 20px;
                       "
                     >
-                       Code verified! Set your new password below.
+                      ✓ Code verified! Set your new password below.
                     </p>
                     <div class="form-group">
                       <label>NEW PASSWORD</label>
@@ -708,6 +766,7 @@
                         type="password"
                         id="sec-new"
                         placeholder="Minimum 8 characters"
+                        autocomplete="new-password"
                       />
                     </div>
                     <div class="form-group">
@@ -716,6 +775,7 @@
                         type="password"
                         id="sec-confirm"
                         placeholder="Repeat new password"
+                        autocomplete="new-password"
                       />
                     </div>
                     <div
@@ -730,6 +790,65 @@
                         >Set New Password
                       </button>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Direct password change — always available, no SMTP needed -->
+                <div class="settings-card">
+                  <h3
+                    style="
+                      font-size: 16px;
+                      font-weight: 700;
+                      margin-bottom: 6px;
+                      color: var(--text-dark);
+                    "
+                  >
+                    Change Password
+                  </h3>
+                  <p
+                    style="
+                      font-size: 13px;
+                      color: var(--text-light);
+                      margin-bottom: 24px;
+                    "
+                  >
+                    Change your password directly using your current password.
+                    No email required.
+                  </p>
+                  <div class="form-group">
+                    <label>CURRENT PASSWORD</label>
+                    <input
+                      type="password"
+                      id="cp-current"
+                      placeholder="Your current password"
+                      autocomplete="current-password"
+                    />
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>NEW PASSWORD</label>
+                      <input
+                        type="password"
+                        id="cp-new"
+                        placeholder="Minimum 8 characters"
+                        autocomplete="new-password"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>CONFIRM NEW PASSWORD</label>
+                      <input
+                        type="password"
+                        id="cp-confirm"
+                        placeholder="Repeat new password"
+                        autocomplete="new-password"
+                      />
+                    </div>
+                  </div>
+                  <div class="settings-actions">
+                    <button id="change-password-btn" class="btn btn-primary">
+                      <i class="ri-key-2-line" style="margin-right: 8px"></i
+                      >Update Password
+                    </button>
                   </div>
                 </div>
               </div>
@@ -777,7 +896,7 @@
       document.addEventListener("DOMContentLoaded", async () => {
         if (!initProtectedPage()) return;
 
-        /* ── Tab switching ── */
+        // ── Tab switching ─────────────────────────────────────────────────────
         document.querySelectorAll(".settings-nav-item").forEach((tab) => {
           tab.addEventListener("click", () => {
             document
@@ -791,13 +910,16 @@
           });
         });
 
-        /*  Load profile  */
+        // ── Load profile ──────────────────────────────────────────────────────
         let profile;
         try {
           profile = await SettingsAPI.getProfile();
           renderProfile(profile);
         } catch (e) {
-          UI.toast("Failed to load profile.", "error");
+          UI.toast(
+            "Failed to load profile: " + (e.message || "Unknown error"),
+            "error",
+          );
         }
 
         function renderProfile(p) {
@@ -815,9 +937,28 @@
             o.selected = o.value === p.display_language;
           });
 
+          // ── BUG FIX: Avatar — add cache-busting timestamp + error fallback ──
           const el = document.getElementById("avatar-display");
           if (p.profile_picture) {
-            el.innerHTML = `<img src="${p.profile_picture}" alt="Avatar">`;
+            const img = document.createElement("img");
+            // Cache-bust with timestamp so updated avatars are always fresh
+            img.src = p.profile_picture + "?t=" + Date.now();
+            img.alt = p.full_name + " avatar";
+            // If image fails to load (e.g. file missing), fall back to initials
+            img.onerror = () => {
+              el.innerHTML = "";
+              el.style.cssText =
+                "background:var(--primary-color);color:#fff;font-weight:700;font-size:28px;";
+              el.textContent = p.full_name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+            };
+            el.innerHTML = "";
+            el.style.cssText = "";
+            el.appendChild(img);
           } else {
             const ini = p.full_name
               .split(" ")
@@ -831,21 +972,21 @@
           }
         }
 
-        /*  Dark mode: apply instantly on toggle  */
+        // ── Dark mode toggle ──────────────────────────────────────────────────
         document
           .getElementById("pf-darkmode")
           .addEventListener("change", (e) => {
             Theme.setDark(e.target.checked);
           });
 
-        /*  Language: apply instantly on change  */
+        // ── Language select ───────────────────────────────────────────────────
         document
           .getElementById("pf-language")
           .addEventListener("change", (e) => {
             Theme.setLang(e.target.value);
           });
 
-        /*  Avatar upload  */
+        // ── Avatar upload ─────────────────────────────────────────────────────
         document
           .getElementById("avatar-edit-btn")
           .addEventListener("click", () => {
@@ -857,12 +998,15 @@
           .addEventListener("change", async (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
             if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
-              UI.toast("Only PNG or JPG allowed.", "error");
+              UI.toast("Only PNG or JPG files are allowed.", "error");
+              e.target.value = "";
               return;
             }
             if (file.size > 5 * 1024 * 1024) {
               UI.toast("File must be under 5 MB.", "error");
+              e.target.value = "";
               return;
             }
 
@@ -870,23 +1014,39 @@
               "inline-flex";
             const fd = new FormData();
             fd.append("file", file);
+
             try {
+              // Use raw fetch so browser sets multipart Content-Type automatically
               const res = await fetch("/api/settings/profile/avatar", {
                 method: "POST",
                 headers: { Authorization: `Bearer ${Auth.getToken()}` },
                 body: fd,
               });
-              if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.detail || "Upload failed");
+
+              let updated;
+              try {
+                updated = await res.json();
+              } catch {
+                updated = {};
               }
-              const updated = await res.json();
+
+              if (!res.ok) {
+                throw new Error(
+                  updated.detail || `Upload failed (HTTP ${res.status})`,
+                );
+              }
+
               renderProfile(updated);
-              Auth.setSession(Auth.getToken(), updated);
+              // Persist the updated profile_picture in localStorage so sidebar updates
+              const currentUser = Auth.getUser();
+              Auth.setSession(Auth.getToken(), { ...currentUser, ...updated });
               UI.populateSidebar();
               UI.toast("Profile picture updated!");
             } catch (err) {
-              UI.toast(err.message, "error");
+              UI.toast(
+                err.message || "Failed to upload. Please try again.",
+                "error",
+              );
             } finally {
               document.getElementById("avatar-uploading").style.display =
                 "none";
@@ -894,36 +1054,43 @@
             }
           });
 
-        /*  Save Profile  */
+        // ── Save Profile ──────────────────────────────────────────────────────
         document
           .getElementById("save-profile-btn")
           .addEventListener("click", async () => {
             const btn = document.getElementById("save-profile-btn");
+            const name = document.getElementById("pf-name").value.trim();
+            if (!name) {
+              UI.toast("Full name cannot be empty.", "error");
+              return;
+            }
+
             UI.setLoading(btn, true);
             try {
               const dark = document.getElementById("pf-darkmode").checked;
               const lang = document.getElementById("pf-language").value;
               const updated = await SettingsAPI.updateProfile({
-                full_name: document.getElementById("pf-name").value.trim(),
+                full_name: name,
                 dark_mode: dark,
                 display_language: lang,
               });
               renderProfile(updated);
               Theme.setDark(dark);
               Theme.setLang(lang);
-              Auth.setSession(Auth.getToken(), updated);
+              const currentUser = Auth.getUser();
+              Auth.setSession(Auth.getToken(), { ...currentUser, ...updated });
               UI.populateSidebar();
               UI.toast("Profile saved successfully!");
             } catch (e) {
-              UI.toast(e.message, "error");
+              UI.toast(e.message || "Failed to save profile.", "error");
             } finally {
               UI.setLoading(btn, false);
             }
           });
 
-        /*  OTP 3-step flow  */
-        let otpTimer = null,
-          verifiedOtp = null;
+        // ── OTP 3-step flow ───────────────────────────────────────────────────
+        let otpTimer = null;
+        let verifiedOtp = null;
 
         function goToStep(n) {
           document
@@ -947,11 +1114,18 @@
           const tm = document.getElementById("otp-timer");
           tm.classList.remove("expired");
           function tick() {
-            cd.textContent = `${String(Math.floor(rem / 60)).padStart(2, "0")}:${String(rem % 60).padStart(2, "0")}`;
+            if (!cd) {
+              clearInterval(otpTimer);
+              return;
+            }
+            cd.textContent =
+              String(Math.floor(rem / 60)).padStart(2, "0") +
+              ":" +
+              String(rem % 60).padStart(2, "0");
             if (rem-- <= 0) {
               clearInterval(otpTimer);
               tm.classList.add("expired");
-              tm.innerHTML = "<strong>Code expired. Please resend.</strong>";
+              tm.textContent = "Code expired. Please click Resend.";
             }
           }
           tick();
@@ -960,16 +1134,30 @@
 
         async function doSendOtp(btn) {
           UI.setLoading(btn, true);
+          // Hide any previous SMTP warning
+          document.getElementById("smtp-warning").classList.remove("show");
           try {
             await SettingsAPI.requestOtp();
             goToStep(2);
             startCountdown(10);
             UI.toast("Verification code sent to your email!");
           } catch (e) {
-            UI.toast(
-              e.message || "Failed to send code. Check SMTP settings.",
-              "error",
-            );
+            const msg = e.message || "Failed to send code.";
+            // 503 = SMTP not configured → show inline warning banner
+            if (
+              msg.toLowerCase().includes("smtp") ||
+              msg.toLowerCase().includes("email service") ||
+              msg.toLowerCase().includes("not configured")
+            ) {
+              document.getElementById("smtp-warning-text").textContent = msg;
+              document.getElementById("smtp-warning").classList.add("show");
+              // Scroll down to the Change Password card
+              document
+                .getElementById("change-password-btn")
+                ?.scrollIntoView({ behavior: "smooth", block: "center" });
+            } else {
+              UI.toast(msg, "error");
+            }
           } finally {
             UI.setLoading(btn, false);
           }
@@ -987,13 +1175,19 @@
           .addEventListener("click", () => {
             const otp = document.getElementById("otp-input").value.trim();
             if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-              UI.toast("Enter the 6-digit code.", "error");
+              UI.toast("Please enter the 6-digit code.", "error");
               return;
             }
             verifiedOtp = otp;
             clearInterval(otpTimer);
             goToStep(3);
+            setTimeout(() => document.getElementById("sec-new")?.focus(), 100);
           });
+
+        // Digit-only enforcement on OTP input
+        document.getElementById("otp-input").addEventListener("input", (e) => {
+          e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+        });
 
         document
           .getElementById("save-password-btn")
@@ -1008,6 +1202,7 @@
               UI.toast("Passwords do not match.", "error");
               return;
             }
+
             const btn = document.getElementById("save-password-btn");
             UI.setLoading(btn, true);
             try {
@@ -1021,18 +1216,64 @@
                 document.getElementById("sec-confirm").value = "";
               }, 1500);
             } catch (e) {
-              UI.toast(e.message, "error");
+              UI.toast(e.message || "Failed to change password.", "error");
+              const msg = (e.message || "").toLowerCase();
               if (
-                e.message.toLowerCase().includes("otp") ||
-                e.message.toLowerCase().includes("code")
-              )
+                msg.includes("otp") ||
+                msg.includes("code") ||
+                msg.includes("expired")
+              ) {
                 goToStep(2);
+              }
             } finally {
               UI.setLoading(btn, false);
             }
           });
 
-        /*  Notification preferences  */
+        // ── Direct password change (no email needed) ──────────────────────────
+        document
+          .getElementById("change-password-btn")
+          .addEventListener("click", async () => {
+            const cur = document.getElementById("cp-current").value;
+            const nw = document.getElementById("cp-new").value;
+            const cn = document.getElementById("cp-confirm").value;
+
+            if (!cur) {
+              UI.toast("Please enter your current password.", "error");
+              return;
+            }
+            if (!nw || nw.length < 8) {
+              UI.toast("New password must be at least 8 characters.", "error");
+              return;
+            }
+            if (nw !== cn) {
+              UI.toast("Passwords do not match.", "error");
+              return;
+            }
+            if (cur === nw) {
+              UI.toast(
+                "New password must be different from the current one.",
+                "error",
+              );
+              return;
+            }
+
+            const btn = document.getElementById("change-password-btn");
+            UI.setLoading(btn, true);
+            try {
+              await SettingsAPI.changePassword(cur, nw, cn);
+              UI.toast("Password updated successfully! 🎉");
+              document.getElementById("cp-current").value = "";
+              document.getElementById("cp-new").value = "";
+              document.getElementById("cp-confirm").value = "";
+            } catch (e) {
+              UI.toast(e.message || "Failed to update password.", "error");
+            } finally {
+              UI.setLoading(btn, false);
+            }
+          });
+
+        // ── Notification preferences ──────────────────────────────────────────
         document
           .getElementById("save-notif-btn")
           .addEventListener("click", async () => {
@@ -1045,7 +1286,7 @@
               );
               UI.toast("Notification preferences saved!");
             } catch (e) {
-              UI.toast(e.message, "error");
+              UI.toast(e.message || "Failed to save preferences.", "error");
             } finally {
               UI.setLoading(btn, false);
             }

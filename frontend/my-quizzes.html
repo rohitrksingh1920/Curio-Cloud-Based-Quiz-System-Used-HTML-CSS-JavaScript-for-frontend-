@@ -14,6 +14,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <style>
+      /* ── Page layout ── */
       .page-header {
         display: flex;
         justify-content: space-between;
@@ -30,6 +31,7 @@
         color: var(--text-light);
       }
 
+      /* ── Filter bar ── */
       .filter-bar {
         background: var(--white);
         border: 1px solid var(--border-color);
@@ -39,12 +41,14 @@
         align-items: center;
         gap: 16px;
         margin-bottom: 24px;
+        flex-wrap: wrap;
       }
       .filter-search {
         display: flex;
         align-items: center;
         gap: 10px;
         flex: 1;
+        min-width: 180px;
       }
       .filter-search i {
         color: var(--text-light);
@@ -86,9 +90,10 @@
         border-color: var(--primary-color);
       }
 
+      /* ── Grid ── */
       .quiz-cards {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 24px;
       }
       .quiz-card {
@@ -150,6 +155,8 @@
         align-items: center;
         padding-top: 16px;
         border-top: 1px dotted var(--border-color);
+        gap: 8px;
+        flex-wrap: wrap;
       }
       .enrolled-avatars {
         display: flex;
@@ -207,7 +214,28 @@
         background: var(--danger);
         color: #fff;
       }
+      .btn-manage {
+        border: 1px solid #a29bfe;
+        color: #6c5ce7;
+        background: transparent;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-family: var(--font-family);
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-manage:hover {
+        background: #6c5ce7;
+        color: #fff;
+        border-color: #6c5ce7;
+      }
 
+      /* ── Skeletons & empty ── */
       .skeleton {
         background: linear-gradient(
           90deg,
@@ -239,10 +267,313 @@
         margin-bottom: 14px;
         color: var(--text-lighter);
       }
+
+      /* ══════════════════════════════════════════════════
+         ENROLLMENT MODAL
+      ══════════════════════════════════════════════════ */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 680px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        animation: modalIn 0.25s ease;
+      }
+      @keyframes modalIn {
+        from {
+          transform: scale(0.95);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+      }
+      .modal-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--bg-color);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: var(--text-light);
+        transition: background 0.2s;
+      }
+      .modal-close:hover {
+        background: #fee2e2;
+        color: var(--danger);
+      }
+      .modal-body {
+        padding: 20px 24px;
+        overflow-y: auto;
+        flex: 1;
+      }
+      .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        flex-shrink: 0;
+      }
+
+      /* Tabs */
+      .modal-tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0;
+      }
+      .modal-tab {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: var(--text-light);
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        font-family: var(--font-family);
+        transition: all 0.2s;
+      }
+      .modal-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* Student search & list */
+      .student-search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        margin-bottom: 14px;
+        background: var(--bg-color);
+      }
+      .student-search-bar input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 14px;
+        font-family: var(--font-family);
+        flex: 1;
+        color: var(--text-dark);
+      }
+      .student-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 320px;
+        overflow-y: auto;
+      }
+      .student-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.15s;
+        user-select: none;
+      }
+      .student-item:hover {
+        background: #f8f9ff;
+        border-color: #e0e7ff;
+      }
+      .student-item.checked {
+        background: #eef2ff;
+        border-color: var(--primary-color);
+      }
+      .student-item.enrolled-row {
+        opacity: 0.7;
+        cursor: default;
+      }
+      .student-checkbox {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 2px solid var(--border-color);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+      .student-item.checked .student-checkbox {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: #fff;
+      }
+      .student-avatar-sm {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .student-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .student-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+      .student-email {
+        font-size: 12px;
+        color: var(--text-light);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .enrolled-pill {
+        font-size: 11px;
+        font-weight: 600;
+        color: #2ed573;
+        background: #e6fff1;
+        padding: 2px 8px;
+        border-radius: 20px;
+        flex-shrink: 0;
+      }
+      .select-all-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 0 2px;
+      }
+      .select-all-bar label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-dark);
+      }
+      .select-all-check {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 2px solid var(--border-color);
+        cursor: pointer;
+        accent-color: var(--primary-color);
+      }
+      .selected-count {
+        font-size: 12px;
+        color: var(--text-light);
+      }
+
+      /* Enrolled tab */
+      .enrolled-student-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        margin-bottom: 6px;
+        background: var(--white);
+      }
+      .enrolled-student-row:last-child {
+        margin-bottom: 0;
+      }
+      .enrolled-date {
+        font-size: 11px;
+        color: var(--text-light);
+        margin-left: auto;
+      }
+      .remove-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-light);
+        font-size: 18px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .remove-btn:hover {
+        color: var(--danger);
+        background: #fee2e2;
+      }
+
+      /* Loading spinner in modal */
+      .modal-spinner {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-light);
+        font-size: 14px;
+      }
+      .modal-spinner i {
+        font-size: 32px;
+        color: var(--primary-color);
+        animation: cqSpin 0.8s linear infinite;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+      @keyframes cqSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
   <body>
     <div class="app-container">
+      <!-- ── Sidebar ── -->
       <aside class="sidebar">
         <div class="sidebar-header">
           <div class="sidebar-brand">
@@ -282,6 +613,7 @@
         </div>
       </aside>
 
+      <!-- ── Main ── -->
       <main class="main-content">
         <header class="top-header">
           <div class="search-bar">
@@ -299,8 +631,9 @@
             <a
               href="create-quiz.html"
               class="btn btn-primary d-flex align-center gap-2"
-              ><i class="ri-add-line"></i> Create New Quiz</a
             >
+              <i class="ri-add-line"></i> Create New Quiz
+            </a>
           </div>
         </header>
 
@@ -308,15 +641,18 @@
           <div class="page-header">
             <div>
               <h1>My Quizzes</h1>
-              <p>
-                Manage and take quizzes. Completed quizzes show the leaderboard.
+              <p id="page-subtitle">
+                Manage and take quizzes. Completed quizzes show the 🏆
+                leaderboard.
               </p>
             </div>
             <a
               href="create-quiz.html"
               class="btn btn-primary d-flex align-center gap-2"
-              ><i class="ri-add-line"></i> Create New Quiz</a
+              id="create-btn"
             >
+              <i class="ri-add-line"></i> Create New Quiz
+            </a>
           </div>
 
           <div class="filter-bar">
@@ -325,7 +661,7 @@
               <input
                 type="text"
                 id="filter-input"
-                placeholder="Filter by title or subject…"
+                placeholder="Filter by title or subject..."
               />
             </div>
             <div class="filter-actions">
@@ -349,11 +685,105 @@
       </main>
     </div>
 
+    <!-- ══════════════════════════════════════════════════
+         ENROLLMENT MODAL
+    ══════════════════════════════════════════════════ -->
+    <div class="modal-overlay" id="enroll-modal">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <div class="modal-header">
+          <h3 id="modal-title">Manage Students</h3>
+          <button class="modal-close" id="modal-close-btn" title="Close">
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabs -->
+          <div class="modal-tabs">
+            <button class="modal-tab active" data-tab="assign">
+              <i class="ri-user-add-line"></i> Assign Students
+            </button>
+            <button class="modal-tab" data-tab="enrolled">
+              <i class="ri-team-line"></i> Enrolled (<span
+                id="enrolled-count-tab"
+                >0</span
+              >)
+            </button>
+          </div>
+
+          <!-- ── Tab: Assign ── -->
+          <div class="tab-panel active" id="tab-assign">
+            <div class="student-search-bar">
+              <i class="ri-search-line" style="color: var(--text-light)"></i>
+              <input
+                type="text"
+                id="student-search"
+                placeholder="Search students by name or email..."
+              />
+            </div>
+            <div class="select-all-bar">
+              <label>
+                <input
+                  type="checkbox"
+                  id="select-all-check"
+                  class="select-all-check"
+                />
+                Select all visible
+              </label>
+              <span class="selected-count" id="selected-count-label"
+                >0 selected</span
+              >
+            </div>
+            <div class="student-list" id="student-list">
+              <div class="modal-spinner">
+                <i class="ri-loader-4-line"></i><br />Loading students...
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Tab: Enrolled ── -->
+          <div class="tab-panel" id="tab-enrolled">
+            <div id="enrolled-list">
+              <div class="modal-spinner">
+                <i class="ri-loader-4-line"></i><br />Loading...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="modal-cancel-btn">
+            Cancel
+          </button>
+          <button class="btn btn-primary" id="modal-enroll-btn">
+            <i class="ri-user-add-line"></i> Enroll Selected
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script src="api.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         if (!initProtectedPage()) return;
 
+        const user = Auth.getUser();
+        const canManage =
+          user && (user.role === "teacher" || user.role === "admin");
+        const isStudent = user && user.role === "student";
+
+        // Adapt UI for students
+        if (isStudent) {
+          document.getElementById("create-btn").style.display = "none";
+          document.getElementById("page-subtitle").textContent =
+            "Here are the quizzes assigned to you. Good luck! 🎯";
+        }
+
+        // ── State ─────────────────────────────────────────────────────────
         const grid = document.getElementById("quiz-grid");
         const filterInput = document.getElementById("filter-input");
         const topSearch = document.getElementById("top-search");
@@ -361,7 +791,24 @@
         let activeStatus = "";
         let searchTerm = "";
 
-        // Pre-fill search from URL ?search=
+        // document.addEventListener("click", (e) => {
+        //   const btn = e.target.closest(".students-btn");
+        //   if (!btn) return;
+
+        //   const quizId = btn.dataset.quizId;
+
+        //   console.log("👉 CLICK WORKS:", quizId);
+
+        //   openEnrollModal(quizId); // ✅ NOW WORKS
+        // });
+
+        // Enrollment modal state
+        let currentQuizId = null;
+        let allStudents = []; // all students from admin API
+        let enrolledStudents = []; // currently enrolled for this quiz
+        let selectedIds = new Set();
+
+        // ── Pre-fill search from URL ───────────────────────────────────────
         const urlSearch =
           new URLSearchParams(window.location.search).get("search") || "";
         if (urlSearch) {
@@ -369,15 +816,25 @@
           searchTerm = urlSearch.toLowerCase();
         }
 
+        // ── Load & render quizzes ─────────────────────────────────────────
         async function loadQuizzes() {
-          grid.innerHTML = `<div class="skeleton" style="height:220px;"></div>
-                          <div class="skeleton" style="height:220px;"></div>
-                          <div class="skeleton" style="height:220px;"></div>`;
+          grid.innerHTML = `
+          <div class="skeleton" style="height:220px;"></div>
+          <div class="skeleton" style="height:220px;"></div>
+          <div class="skeleton" style="height:220px;"></div>`;
           try {
             allQuizzes = await QuizAPI.list();
             renderCards();
           } catch (e) {
-            grid.innerHTML = `<div class="empty-state"><i class="ri-error-warning-line"></i><p>${e.message}</p></div>`;
+            grid.innerHTML = `
+            <div class="empty-state">
+              <i class="ri-error-warning-line"></i>
+              <h3>Failed to load quizzes</h3>
+              <p>${e.message}</p>
+              <button class="btn btn-primary" style="margin-top:16px;" onclick="location.reload()">
+                Retry
+              </button>
+            </div>`;
           }
         }
 
@@ -394,12 +851,20 @@
 
           if (!filtered.length) {
             grid.innerHTML = `
-                <div class="empty-state">
-                    <i class="ri-file-list-3-line"></i>
-                    <h3>No quizzes found</h3>
-                    <p>${searchTerm || activeStatus ? "Try a different filter." : "Create your first quiz!"}</p>
-                    ${!searchTerm && !activeStatus ? '<a href="create-quiz.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;"><i class="ri-add-line"></i> Create Quiz</a>' : ""}
-                </div>`;
+            <div class="empty-state">
+              <i class="ri-file-list-3-line"></i>
+              <h3>No quizzes found</h3>
+              ${
+                searchTerm || activeStatus
+                  ? "<p>Try a different filter or search term.</p>"
+                  : isStudent
+                    ? "<p>You have not been assigned any quizzes yet.<br>Your teacher will assign quizzes to you soon.</p>"
+                    : `<p>You have not created any quizzes yet.</p>
+                     <a href="create-quiz.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex;align-items:center;gap:8px;">
+                       <i class="ri-add-line"></i> Create Quiz
+                     </a>`
+              }
+            </div>`;
             return;
           }
           grid.innerHTML = filtered.map((q) => buildCard(q)).join("");
@@ -433,64 +898,95 @@
 
           let footerBtn;
           if (quiz.is_attempted || quiz.status === "completed") {
-            // ── LEADERBOARD BUTTON on completed quizzes ──────────────────
             footerBtn = `
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <button style="padding:5px 12px;font-size:12px;border:1px solid #ccc;
-                                   color:#999;background:transparent;border-radius:20px;cursor:default;" disabled>
-                         Done
-                    </button>
-                    <a href="leaderboard.html?id=${quiz.id}" class="btn-outline">
-                        <i class="ri-trophy-line"></i> Board
-                    </a>
-                </div>`;
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button style="padding:5px 12px;font-size:12px;border:1px solid #ccc;
+                             color:#999;background:transparent;border-radius:20px;cursor:default;" disabled>
+                ✅ Done
+              </button>
+              <a href="leaderboard.html?id=${quiz.id}" class="btn-outline">
+                <i class="ri-trophy-line"></i> Board
+              </a>
+            </div>`;
           } else if (quiz.status === "upcoming") {
             footerBtn = `
-                <button style="padding:6px 12px;font-size:13px;opacity:.5;cursor:not-allowed;
-                               border:1px solid var(--border-color);border-radius:20px;
-                               background:transparent;font-family:var(--font-family);" disabled>
-                    Not Started
-                </button>`;
+            <button style="padding:6px 12px;font-size:13px;opacity:.5;cursor:not-allowed;
+                           border:1px solid var(--border-color);border-radius:20px;
+                           background:transparent;font-family:var(--font-family);" disabled>
+              Not Started
+            </button>`;
           } else {
             footerBtn = `
-                <button class="btn-outline" data-action="take" data-id="${quiz.id}">
-                    Start Quiz
-                </button>`;
+            <button class="btn-outline" data-action="take" data-id="${quiz.id}">
+              Start Quiz
+            </button>`;
           }
 
+          const manageBtn = canManage
+            ? `
+          <button 
+  class="btn-manage students-btn" 
+  data-quiz-id="${quiz.id}">
+  Students
+</button>`
+            : "";
+
+          const deleteBtn = canManage
+            ? `
+          <button class="btn-danger-outline" data-action="delete" data-id="${quiz.id}" title="Delete quiz">
+            <i class="ri-delete-bin-line"></i>
+          </button>`
+            : "";
+
           return `
-        <div class="quiz-card" data-id="${quiz.id}">
+          <div class="quiz-card" data-id="${quiz.id}">
             <div class="quiz-meta">
-                <span class="quiz-subject">${(quiz.category || "").toUpperCase()}</span>
-                <span class="quiz-badge" style="background:${badgeBg};color:${badgeTc};">${quiz.status}</span>
+              <span class="quiz-subject">${(quiz.category || "").toUpperCase()}</span>
+              <span class="quiz-badge" style="background:${badgeBg};color:${badgeTc};">${quiz.status}</span>
             </div>
             <h3 class="quiz-title">${quiz.title}</h3>
             <div class="quiz-details">
-                ${quiz.scheduled_date ? `<div class="quiz-detail-item"><i class="ri-calendar-line"></i>${quiz.scheduled_date}</div>` : ""}
-                ${timeStr ? `<div class="quiz-detail-item"><i class="ri-time-line"></i>${timeStr} (${quiz.duration_mins} mins)</div>` : `<div class="quiz-detail-item"><i class="ri-time-line"></i>${quiz.duration_mins} mins</div>`}
-                <div class="quiz-detail-item"><i class="ri-award-line"></i>${quiz.total_points} points</div>
+              ${
+                quiz.scheduled_date
+                  ? `<div class="quiz-detail-item"><i class="ri-calendar-line"></i>${quiz.scheduled_date}</div>`
+                  : ""
+              }
+              <div class="quiz-detail-item">
+                <i class="ri-time-line"></i>
+                ${timeStr ? `${timeStr} (${quiz.duration_mins} mins)` : `${quiz.duration_mins} mins`}
+              </div>
+              <div class="quiz-detail-item"><i class="ri-award-line"></i>${quiz.total_points} points</div>
             </div>
             <div class="quiz-card-footer">
-                <div style="display:flex;align-items:center;">
-                    <div class="enrolled-avatars">${avatars}</div>
-                    <span class="enrolled-text">+${quiz.enrolled_count || 0} enrolled</span>
-                </div>
-                <div style="display:flex;gap:8px;align-items:center;">
-                    ${footerBtn}
-                    <button class="btn-danger-outline" data-action="delete" data-id="${quiz.id}" title="Delete">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
-                </div>
+              <div style="display:flex;align-items:center;">
+                <div class="enrolled-avatars">${avatars}</div>
+                <span class="enrolled-text">+${quiz.enrolled_count || 0} enrolled</span>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                ${footerBtn}
+                ${manageBtn}
+                ${deleteBtn}
+              </div>
             </div>
-        </div>`;
+          </div>`;
         }
 
         function attachCardListeners() {
+          grid.querySelectorAll(".students-btn").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const quizId = btn.dataset.quizId;
+
+              console.log("👉 CLICK WORKS:", quizId);
+
+              openEnrollModal(quizId);
+            });
+          });
           grid.querySelectorAll('[data-action="take"]').forEach((btn) => {
             btn.addEventListener("click", () => {
               window.location.href = `take-quiz.html?id=${btn.dataset.id}`;
             });
           });
+
           grid.querySelectorAll('[data-action="delete"]').forEach((btn) => {
             btn.addEventListener("click", async () => {
               if (!confirm("Delete this quiz? This cannot be undone.")) return;
@@ -503,9 +999,15 @@
               }
             });
           });
+
+          // grid.querySelectorAll('[data-action="manage"]').forEach((btn) => {
+          //   btn.addEventListener("click", () =>
+          //     openEnrollModal(parseInt(btn.dataset.id)),
+          //   );
+          // });
         }
 
-        // Filter buttons
+        // ── Filter buttons ─────────────────────────────────────────────────
         document.querySelectorAll(".filter-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             document
@@ -517,7 +1019,6 @@
           });
         });
 
-        // Search filter
         let debounce;
         filterInput.addEventListener("input", (e) => {
           clearTimeout(debounce);
@@ -527,13 +1028,386 @@
           }, 300);
         });
 
-        // Header search
         topSearch.addEventListener("keydown", (e) => {
           if (e.key === "Enter" && e.target.value.trim()) {
             window.location.href = `my-quizzes.html?search=${encodeURIComponent(e.target.value.trim())}`;
           }
         });
 
+        // ══════════════════════════════════════════════════
+        // ENROLLMENT MODAL LOGIC
+        // ══════════════════════════════════════════════════
+        const modal = document.getElementById("enroll-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const enrolledCountTab = document.getElementById("enrolled-count-tab");
+        const studentList = document.getElementById("student-list");
+        const enrolledList = document.getElementById("enrolled-list");
+        const studentSearch = document.getElementById("student-search");
+        const selectAllCheck = document.getElementById("select-all-check");
+        const selectedCountLbl = document.getElementById(
+          "selected-count-label",
+        );
+        const enrollBtn = document.getElementById("modal-enroll-btn");
+
+        // Tab switching
+        document.querySelectorAll(".modal-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document
+              .querySelectorAll(".modal-tab")
+              .forEach((t) => t.classList.remove("active"));
+            document
+              .querySelectorAll(".tab-panel")
+              .forEach((p) => p.classList.remove("active"));
+            tab.classList.add("active");
+            document
+              .getElementById(`tab-${tab.dataset.tab}`)
+              .classList.add("active");
+
+            if (tab.dataset.tab === "enrolled") {
+              renderEnrolledList();
+            }
+          });
+        });
+
+        async function openEnrollModal(quizId) {
+          console.log("🔥 openEnrollModal called with:", quizId, typeof quizId);
+          // currentQuizId = quizId;
+          currentQuizId = parseInt(quizId);
+          selectedIds.clear();
+          // const quiz = allQuizzes.find((q) => q.id === quizId);
+          const quiz = allQuizzes.find((q) => q.id === parseInt(quizId));
+          modalTitle.textContent = `Manage Students — ${quiz ? quiz.title : "Quiz"}`;
+
+          // Reset to assign tab
+          document
+            .querySelectorAll(".modal-tab")
+            .forEach((t) => t.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-panel")
+            .forEach((p) => p.classList.remove("active"));
+          document.querySelector('[data-tab="assign"]').classList.add("active");
+          document.getElementById("tab-assign").classList.add("active");
+
+          modal.classList.add("open");
+          document.body.style.overflow = "hidden";
+
+          studentSearch.value = "";
+          selectAllCheck.checked = false;
+          updateSelectedCount();
+
+          // Load all students + enrolled students in parallel
+          studentList.innerHTML = `<div class="modal-spinner"><i class="ri-loader-4-line"></i><br>Loading students...</div>`;
+          enrolledList.innerHTML = `<div class="modal-spinner"><i class="ri-loader-4-line"></i><br>Loading...</div>`;
+
+          try {
+            [allStudents, enrolledStudents] = await Promise.all([
+              AdminAPI.listStudents(),
+              EnrollAPI.getStudents(quizId),
+            ]);
+            enrolledCountTab.textContent = enrolledStudents.length;
+            renderStudentList();
+          } catch (e) {
+            studentList.innerHTML = `
+            <div style="text-align:center;padding:20px;color:var(--danger);">
+              <i class="ri-error-warning-line" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+              Failed to load students: ${e.message}
+            </div>`;
+          }
+        }
+
+        function closeModal() {
+          modal.classList.remove("open");
+          document.body.style.overflow = "";
+          currentQuizId = null;
+          selectedIds.clear();
+        }
+
+        document
+          .getElementById("modal-close-btn")
+          .addEventListener("click", closeModal);
+        document
+          .getElementById("modal-cancel-btn")
+          .addEventListener("click", closeModal);
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closeModal();
+        });
+
+        // ── Render assign-tab student list ────────────────────────────────
+        function getEnrolledIds() {
+          return new Set(enrolledStudents.map((s) => s.id));
+        }
+
+        function renderStudentList(filter = "") {
+          const enrolledIds = getEnrolledIds();
+          const f = filter.toLowerCase();
+          const visible = allStudents.filter(
+            (s) =>
+              !f ||
+              s.full_name.toLowerCase().includes(f) ||
+              s.email.toLowerCase().includes(f),
+          );
+
+          if (!visible.length) {
+            studentList.innerHTML = `
+            <div style="text-align:center;padding:30px;color:var(--text-light);">
+              <i class="ri-user-search-line" style="font-size:32px;display:block;margin-bottom:8px;"></i>
+              No students found.
+            </div>`;
+            return;
+          }
+
+          studentList.innerHTML = visible
+            .map((s) => {
+              const isEnrolled = enrolledIds.has(s.id);
+              const isSelected = selectedIds.has(s.id);
+              const initials = s.full_name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              return `
+            <div class="student-item ${isSelected ? "checked" : ""} ${isEnrolled ? "enrolled-row" : ""}"
+                 data-uid="${s.id}" ${isEnrolled ? "title='Already enrolled'" : ""}>
+              <div class="student-checkbox">
+                ${isSelected ? '<i class="ri-check-line" style="font-size:12px;"></i>' : ""}
+              </div>
+              <div class="student-avatar-sm">${initials}</div>
+              <div class="student-info">
+                <div class="student-name">${s.full_name}</div>
+                <div class="student-email">${s.email}</div>
+              </div>
+              ${isEnrolled ? '<span class="enrolled-pill">✓ Enrolled</span>' : ""}
+            </div>`;
+            })
+            .join("");
+
+          // Click to toggle selection (skip already-enrolled)
+          studentList
+            .querySelectorAll(".student-item:not(.enrolled-row)")
+            .forEach((row) => {
+              row.addEventListener("click", () => {
+                const uid = parseInt(row.dataset.uid);
+                if (selectedIds.has(uid)) {
+                  selectedIds.delete(uid);
+                  row.classList.remove("checked");
+                  row.querySelector(".student-checkbox").innerHTML = "";
+                } else {
+                  selectedIds.add(uid);
+                  row.classList.add("checked");
+                  row.querySelector(".student-checkbox").innerHTML =
+                    '<i class="ri-check-line" style="font-size:12px;"></i>';
+                }
+                updateSelectedCount();
+                updateSelectAllState(visible, enrolledIds);
+              });
+            });
+
+          updateSelectAllState(visible, enrolledIds);
+        }
+
+        function updateSelectAllState(visible, enrolledIds) {
+          const selectableVisible = visible.filter(
+            (s) => !enrolledIds.has(s.id),
+          );
+          const allChecked =
+            selectableVisible.length > 0 &&
+            selectableVisible.every((s) => selectedIds.has(s.id));
+          selectAllCheck.checked = allChecked;
+          selectAllCheck.indeterminate =
+            !allChecked && selectableVisible.some((s) => selectedIds.has(s.id));
+        }
+
+        function updateSelectedCount() {
+          selectedCountLbl.textContent = `${selectedIds.size} selected`;
+          enrollBtn.disabled = selectedIds.size === 0;
+        }
+
+        // Select all
+        selectAllCheck.addEventListener("change", () => {
+          const enrolledIds = getEnrolledIds();
+          const f = studentSearch.value.toLowerCase();
+          const visible = allStudents.filter(
+            (s) =>
+              !f ||
+              s.full_name.toLowerCase().includes(f) ||
+              s.email.toLowerCase().includes(f),
+          );
+          const selectable = visible.filter((s) => !enrolledIds.has(s.id));
+
+          if (selectAllCheck.checked) {
+            selectable.forEach((s) => selectedIds.add(s.id));
+          } else {
+            selectable.forEach((s) => selectedIds.delete(s.id));
+          }
+          renderStudentList(studentSearch.value);
+          updateSelectedCount();
+        });
+
+        // Search students
+        let studentDebounce;
+        studentSearch.addEventListener("input", (e) => {
+          clearTimeout(studentDebounce);
+          studentDebounce = setTimeout(() => {
+            renderStudentList(e.target.value.trim());
+            updateSelectedCount();
+          }, 200);
+        });
+
+        // ── Render enrolled tab ───────────────────────────────────────────
+        function renderEnrolledList() {
+          if (!enrolledStudents.length) {
+            enrolledList.innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--text-light);">
+              <i class="ri-team-line" style="font-size:36px;display:block;margin-bottom:10px;"></i>
+              <p>No students enrolled yet.</p>
+              <p style="font-size:13px;">Use the "Assign Students" tab to enroll them.</p>
+            </div>`;
+            return;
+          }
+
+          enrolledList.innerHTML = enrolledStudents
+            .map((s) => {
+              const initials = s.full_name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 2);
+              const date = s.enrolled_at
+                ? new Date(s.enrolled_at).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "";
+              return `
+            <div class="enrolled-student-row" data-uid="${s.id}">
+              <div class="student-avatar-sm">${initials}</div>
+              <div class="student-info">
+                <div class="student-name">${s.full_name}</div>
+                <div class="student-email">${s.email}</div>
+              </div>
+              <span class="enrolled-date">${date}</span>
+              <button class="remove-btn" data-uid="${s.id}" title="Remove from quiz">
+                <i class="ri-user-unfollow-line"></i>
+              </button>
+            </div>`;
+            })
+            .join("");
+
+          enrolledList.querySelectorAll(".remove-btn").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const uid = parseInt(btn.dataset.uid);
+              const student = enrolledStudents.find((s) => s.id === uid);
+              if (!student) return;
+              if (!confirm(`Remove ${student.full_name} from this quiz?`))
+                return;
+
+              btn.disabled = true;
+              btn.innerHTML =
+                '<i class="ri-loader-4-line" style="animation:cqSpin .8s linear infinite;display:inline-block;"></i>';
+
+              try {
+                await EnrollAPI.removeEnrollment(currentQuizId, uid);
+                enrolledStudents = enrolledStudents.filter((s) => s.id !== uid);
+                selectedIds.delete(uid);
+                enrolledCountTab.textContent = enrolledStudents.length;
+                renderEnrolledList();
+                renderStudentList(studentSearch.value);
+                updateSelectedCount();
+                UI.toast(`${student.full_name} removed from quiz.`);
+                // Refresh quiz cards to update enrolled_count
+                await loadQuizzes();
+              } catch (e) {
+                UI.toast(e.message, "error");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-user-unfollow-line"></i>';
+              }
+            });
+          });
+        }
+
+        // ── Enroll button ────────────────────────────────────────────────
+        // enrollBtn.addEventListener("click", async () => {
+        //   if (!selectedIds.size) return;
+
+        //   UI.setLoading(enrollBtn, true);
+        //   try {
+        //     const result = await EnrollAPI.enroll(
+        //       currentQuizId,
+        //       Array.from(selectedIds),
+        //     );
+
+        //     // Refresh enrolled list
+        //     enrolledStudents = await EnrollAPI.getStudents(currentQuizId);
+        //     enrolledCountTab.textContent = enrolledStudents.length;
+        //     selectedIds.clear();
+        //     renderStudentList(studentSearch.value);
+        //     updateSelectedCount();
+        //     selectAllCheck.checked = false;
+
+        //     // Build feedback message
+        //     const parts = [];
+        //     if (result.enrolled?.length)
+        //       parts.push(`${result.enrolled.length} enrolled`);
+        //     if (result.already_enrolled?.length)
+        //       parts.push(`${result.already_enrolled.length} already enrolled`);
+        //     if (result.not_found?.length)
+        //       parts.push(`${result.not_found.length} not found`);
+        //     UI.toast(
+        //       parts.join(" · ") || "Done!",
+        //       result.enrolled?.length ? "success" : "error",
+        //     );
+
+        //     // Refresh quiz cards
+        //     await loadQuizzes();
+        //   } catch (e) {
+        //     UI.toast(e.message, "error");
+        //   } finally {
+        //     UI.setLoading(enrollBtn, false);
+        //   }
+        // });
+
+        enrollBtn.addEventListener("click", async () => {
+          if (!selectedIds.size) {
+            UI.toast("Select at least one student", "error");
+            return;
+          }
+
+          UI.setLoading(enrollBtn, true);
+
+          try {
+            // ✅ Send request
+            await EnrollAPI.enroll(currentQuizId, Array.from(selectedIds));
+
+            // ✅ Simple success message
+            UI.toast("Students assigned successfully", "success");
+
+            // ✅ Refresh enrolled students
+            enrolledStudents = await EnrollAPI.getStudents(currentQuizId);
+            enrolledCountTab.textContent = enrolledStudents.length;
+
+            // ✅ Re-render UI
+            renderStudentList(studentSearch.value);
+            renderEnrolledList();
+
+            // ✅ Reset selection
+            selectedIds.clear();
+            updateSelectedCount();
+            selectAllCheck.checked = false;
+          } catch (e) {
+            UI.toast(e.message, "error");
+          } finally {
+            UI.setLoading(enrollBtn, false);
+          }
+        });
+
+        // ── Boot ──────────────────────────────────────────────────────────
+        updateSelectedCount(); // initialise button state
         await loadQuizzes();
       });
     </script>

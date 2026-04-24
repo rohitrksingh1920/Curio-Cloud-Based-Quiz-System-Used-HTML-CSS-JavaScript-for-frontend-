@@ -1,3 +1,6 @@
+
+
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -10,7 +13,7 @@ from backend.app.models.quiz import Quiz
 from backend.app.models.attempt import QuizAttempt
 from backend.app.schemas.misc import AnalyticsSummary, ScoreTrendPoint, SubjectPerformance
 
-router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
+router = APIRouter()
 
 
 @router.get("", response_model=AnalyticsSummary)

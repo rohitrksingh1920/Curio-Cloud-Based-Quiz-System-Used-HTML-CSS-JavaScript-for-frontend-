@@ -1,12 +1,6 @@
-"""
-backend/app/routers/admin.py  ← NEW FILE
 
-Admin-only endpoints:
-  GET    /api/admin/users                    — list all users
-  PATCH  /api/admin/users/{id}/role          — promote/demote role
-  DELETE /api/admin/users/{id}               — delete user
-  GET    /api/admin/users/students           — list all students (for enrollment UI)
-"""
+
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -16,7 +10,7 @@ from backend.app.core.database import get_db
 from backend.app.core.security import require_admin, get_current_user
 from backend.app.models.user import User, UserRole
 
-router = APIRouter(prefix="/api/admin", tags=["Admin"])
+router = APIRouter()
 
 
 class UserListItem(BaseModel):

@@ -1,3 +1,8 @@
+
+
+
+
+
 from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import date, time, datetime
@@ -74,6 +79,8 @@ class QuizCreate(BaseModel):
     scheduled_date: Optional[date] = None
     scheduled_time: Optional[time] = None
     questions: List[QuestionCreate]
+
+    student_ids: Optional[List[int]] = []
 
     @field_validator("title")
     @classmethod

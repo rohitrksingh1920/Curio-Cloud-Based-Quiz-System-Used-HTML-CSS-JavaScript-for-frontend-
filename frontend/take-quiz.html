@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Curio - Take Quiz</title>
+    <title>Cloud Quiz - Take Quiz</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -351,15 +351,58 @@
         } catch (e) {
           // If already completed, show friendly message with link
           const msg = e.message || "Unable to load quiz";
+          const msgLower = msg.toLowerCase();
+
+          // Classify error type for a friendly message
           const isCompleted =
-            msg.toLowerCase().includes("already completed") ||
-            msg.toLowerCase().includes("already have");
+            msgLower.includes("already completed") ||
+            msgLower.includes("already have");
+          const isNotEnrolled =
+            msgLower.includes("not enrolled") || msgLower.includes("enroll");
+          const isNotStarted =
+            msgLower.includes("not yet available") ||
+            msgLower.includes("starts at");
+          const isTimedOut = msgLower.includes("timed out");
+
+          let icon, iconColor, title, detail;
+          if (isCompleted) {
+            icon = "ri-checkbox-circle-line";
+            iconColor = "#2ED573";
+            title = "Already Completed";
+            detail = "You have already submitted this quiz.";
+          } else if (isNotEnrolled) {
+            icon = "ri-lock-line";
+            iconColor = "#5352ED";
+            title = "Not Enrolled";
+            detail =
+              "You have not been assigned this quiz. Contact your teacher.";
+          } else if (isNotStarted) {
+            icon = "ri-time-line";
+            iconColor = "#FFA502";
+            title = "Quiz Not Started Yet";
+            detail = msg;
+          } else if (isTimedOut) {
+            icon = "ri-timer-line";
+            iconColor = "#FF4757";
+            title = "Attempt Timed Out";
+            detail = "Your previous attempt has expired. Contact your teacher.";
+          } else {
+            icon = "ri-error-warning-line";
+            iconColor = "var(--danger)";
+            title = "Cannot Load Quiz";
+            detail = msg;
+          }
+
           document.getElementById("loading-screen").innerHTML =
-            `<div style="text-align:center;padding:60px 24px;">
-                <i class="ri-${isCompleted ? "checkbox-circle" : "error-warning"}-line" style="font-size:56px;color:${isCompleted ? "#2ED573" : "var(--danger)"};display:block;margin-bottom:16px;"></i>
-                <p style="font-size:18px;font-weight:600;margin-bottom:8px;">${isCompleted ? "Already Completed" : "Cannot Load Quiz"}</p>
-                <p style="color:var(--text-light);margin-bottom:24px;">${msg}</p>
-                <a href="my-quizzes.html" class="btn btn-primary">Back to My Quizzes</a>
+            `<div style="text-align:center;padding:60px 24px;max-width:480px;margin:0 auto;">
+              <div style="width:80px;height:80px;border-radius:50%;background:#f1f2f6;
+                          display:inline-flex;align-items:center;justify-content:center;
+                          font-size:40px;margin-bottom:20px;color:${iconColor};">
+                <i class="${icon}"></i>
+              </div>
+              <p style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text-dark);">${title}</p>
+              <p style="color:var(--text-light);margin-bottom:28px;line-height:1.6;">${detail}</p>
+              <a href="my-quizzes.html" class="btn btn-primary">Back to My Quizzes</a>
             </div>`;
           return;
         }
@@ -493,7 +536,7 @@
           document.getElementById("result-score").textContent =
             result.score_pct + "%";
           document.getElementById("result-label").textContent = result.passed
-            ? " Passed!"
+            ? "🎉 Passed!"
             : "Better luck next time";
           document.getElementById("rs-correct").textContent =
             result.correct_count;

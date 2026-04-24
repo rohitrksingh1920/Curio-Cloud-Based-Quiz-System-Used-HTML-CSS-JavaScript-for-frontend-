@@ -41,6 +41,11 @@
         gap: 32px;
         align-items: start;
       }
+      @media (max-width: 900px) {
+        .create-quiz-layout {
+          grid-template-columns: 1fr;
+        }
+      }
       .card-header {
         margin-bottom: 24px;
       }
@@ -181,10 +186,129 @@
         color: var(--success);
         font-weight: 600;
       }
+
+      /* ── Student picker panel ── */
+      .student-picker {
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+      .student-picker-search {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border-color);
+        background: var(--bg-color);
+      }
+      .student-picker-search input {
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 13px;
+        font-family: var(--font-family);
+        flex: 1;
+        color: var(--text-dark);
+      }
+      .student-picker-list {
+        max-height: 220px;
+        overflow-y: auto;
+      }
+      .sp-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        cursor: pointer;
+        transition: background 0.15s;
+        user-select: none;
+      }
+      .sp-item:hover {
+        background: #f8f9ff;
+      }
+      .sp-item.checked {
+        background: #eef2ff;
+      }
+      .sp-checkbox {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 2px solid var(--border-color);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        transition: all 0.15s;
+      }
+      .sp-item.checked .sp-checkbox {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: #fff;
+      }
+      .sp-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .sp-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+      .sp-email {
+        font-size: 11px;
+        color: var(--text-light);
+      }
+      .sp-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-color);
+      }
+      .sp-footer label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-dark);
+        text-transform: none;
+        letter-spacing: 0;
+      }
+      .sp-count {
+        font-size: 12px;
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+      .sp-empty {
+        text-align: center;
+        padding: 24px;
+        color: var(--text-light);
+        font-size: 13px;
+      }
+      .sp-loading {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-light);
+        font-size: 13px;
+      }
     </style>
   </head>
   <body>
     <div class="app-container">
+      <!-- ── Sidebar ── -->
       <aside class="sidebar">
         <div class="sidebar-header">
           <div class="sidebar-brand">
@@ -192,7 +316,7 @@
               class="ri-cloud-line"
               style="color: var(--primary-color); font-size: 24px"
             ></i>
-            Curio
+            Cloud Quiz
           </div>
         </div>
         <nav class="sidebar-menu">
@@ -224,6 +348,7 @@
         </div>
       </aside>
 
+      <!-- ── Main ── -->
       <main class="main-content">
         <header class="top-header">
           <div class="search-bar">
@@ -240,8 +365,9 @@
             <a
               href="create-quiz.html"
               class="btn btn-primary d-flex align-center gap-2"
-              ><i class="ri-add-line"></i> Create New Quiz</a
             >
+              <i class="ri-add-line"></i> Create New Quiz
+            </a>
           </div>
         </header>
 
@@ -264,66 +390,93 @@
           </div>
 
           <div class="create-quiz-layout">
-            <!-- Settings Panel -->
-            <div class="card">
-              <div class="card-header">
-                <h2>Quiz Settings</h2>
-                <p>Configure the basic details of your quiz.</p>
-              </div>
-              <div class="form-group">
-                <label>QUIZ TITLE</label>
-                <input
-                  type="text"
-                  id="quiz-title"
-                  placeholder="e.g. React.js Fundamentals"
-                />
-              </div>
-              <div class="form-group">
-                <label>SUBJECT / CATEGORY</label>
-                <select id="quiz-category">
-                  <option value="">Select Category</option>
-                  <option value="Computer Science">Computer Science</option>
-                  <option value="Mathematics">Mathematics</option>
-                  <option value="History">History</option>
-                  <option value="Science">Science</option>
-                  <option value="Geography">Geography</option>
-                  <option value="English">English</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div class="form-row">
+            <!-- ── Settings Panel ── -->
+            <div>
+              <div class="card" style="margin-bottom: 24px">
+                <div class="card-header">
+                  <h2>Quiz Settings</h2>
+                  <p>Configure the basic details of your quiz.</p>
+                </div>
                 <div class="form-group">
-                  <label>DURATION (MINS)</label>
+                  <label>QUIZ TITLE</label>
                   <input
-                    type="number"
-                    id="quiz-duration"
-                    placeholder="30"
-                    min="1"
+                    type="text"
+                    id="quiz-title"
+                    placeholder="e.g. React.js Fundamentals"
                   />
                 </div>
                 <div class="form-group">
-                  <label>TOTAL POINTS</label>
-                  <input
-                    type="number"
-                    id="quiz-points"
-                    placeholder="100"
-                    min="1"
-                  />
+                  <label>SUBJECT / CATEGORY</label>
+                  <select id="quiz-category">
+                    <option value="">Select Category</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="History">History</option>
+                    <option value="Science">Science</option>
+                    <option value="Geography">Geography</option>
+                    <option value="English">English</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>DURATION (MINS)</label>
+                    <input
+                      type="number"
+                      id="quiz-duration"
+                      placeholder="30"
+                      min="1"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>TOTAL POINTS</label>
+                    <input
+                      type="number"
+                      id="quiz-points"
+                      placeholder="100"
+                      min="1"
+                    />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>DATE</label>
+                    <input type="date" id="quiz-date" />
+                  </div>
+                  <div class="form-group">
+                    <label>TIME</label>
+                    <input type="time" id="quiz-time" />
+                  </div>
                 </div>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>DATE</label>
-                  <input type="date" id="quiz-date" />
+
+              <!-- ── Student Assignment Panel ── -->
+              <div class="card">
+                <div class="card-header">
+                  <h2>Assign Students</h2>
+                  <p>
+                    Select students to enroll in this quiz. You can also assign
+                    later from My Quizzes.
+                  </p>
                 </div>
-                <div class="form-group">
-                  <label>TIME</label>
-                  <input type="time" id="quiz-time" />
+                <div class="form-group" style="margin-bottom: 0">
+                  <div id="student-picker-container">
+                    <div class="sp-loading">
+                      <i
+                        class="ri-loader-4-line"
+                        style="
+                          animation: cqSpin 0.8s linear infinite;
+                          display: inline-block;
+                        "
+                      ></i>
+                      Loading students...
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Questions Panel -->
+            <!-- ── Questions Panel ── -->
             <div>
               <h2 class="questions-header">Questions</h2>
               <div id="questions-container"></div>
@@ -345,31 +498,199 @@
 
     <script src="api.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
         if (!initProtectedPage()) return;
 
+        // RBAC: students cannot create quizzes
+        const _user = Auth.getUser();
+        if (_user && _user.role === "student") {
+          UI.toast(
+            "Access denied — only teachers and admins can create quizzes.",
+            "error",
+          );
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+          return;
+        }
+
+        // ── Student picker state ───────────────────────────────────────────
+        let allStudents = [];
+        let selectedStudIds = new Set();
+        let spSearchTerm = "";
+
+        async function loadStudentPicker() {
+          const container = document.getElementById("student-picker-container");
+          try {
+            allStudents = await AdminAPI.listStudents();
+            renderStudentPicker();
+          } catch (e) {
+            container.innerHTML = `
+            <div style="padding:16px;color:var(--danger);font-size:13px;border:1px solid var(--border-color);border-radius:var(--radius-sm);">
+              <i class="ri-error-warning-line"></i>
+              Could not load students: ${e.message}
+            </div>`;
+          }
+        }
+
+        function renderStudentPicker() {
+          const container = document.getElementById("student-picker-container");
+          if (!allStudents.length) {
+            container.innerHTML = `
+            <div style="padding:16px;color:var(--text-light);font-size:13px;border:1px solid var(--border-color);border-radius:var(--radius-sm);text-align:center;">
+              <i class="ri-team-line" style="font-size:24px;display:block;margin-bottom:6px;"></i>
+              No students registered yet.
+            </div>`;
+            return;
+          }
+
+          const filtered = allStudents.filter(
+            (s) =>
+              !spSearchTerm ||
+              s.full_name.toLowerCase().includes(spSearchTerm) ||
+              s.email.toLowerCase().includes(spSearchTerm),
+          );
+
+          const selectableFiltered = filtered; // all are selectable on create
+          const allChecked =
+            selectableFiltered.length > 0 &&
+            selectableFiltered.every((s) => selectedStudIds.has(s.id));
+
+          container.innerHTML = `
+          <div class="student-picker">
+            <div class="student-picker-search">
+              <i class="ri-search-line" style="color:var(--text-light);font-size:16px;"></i>
+              <input type="text" id="sp-search" placeholder="Search students..." value="${spSearchTerm}" />
+            </div>
+            <div class="student-picker-list" id="sp-list">
+              ${
+                filtered.length
+                  ? filtered
+                      .map((s) => {
+                        const ini = s.full_name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()
+                          .slice(0, 2);
+                        const chk = selectedStudIds.has(s.id);
+                        return `
+                      <div class="sp-item ${chk ? "checked" : ""}" data-uid="${s.id}">
+                        <div class="sp-checkbox">${chk ? '<i class="ri-check-line"></i>' : ""}</div>
+                        <div class="sp-avatar">${ini}</div>
+                        <div>
+                          <div class="sp-name">${s.full_name}</div>
+                          <div class="sp-email">${s.email}</div>
+                        </div>
+                      </div>`;
+                      })
+                      .join("")
+                  : '<div class="sp-empty">No students match your search.</div>'
+              }
+            </div>
+            <div class="sp-footer">
+              <label>
+                <input type="checkbox" id="sp-select-all" ${allChecked ? "checked" : ""} style="accent-color:var(--primary-color);" />
+                Select all (${filtered.length})
+              </label>
+              <span class="sp-count">${selectedStudIds.size} selected</span>
+            </div>
+          </div>`;
+
+          // Toggle individual
+          container.querySelectorAll(".sp-item").forEach((row) => {
+            row.addEventListener("click", () => {
+              const uid = parseInt(row.dataset.uid);
+              if (selectedStudIds.has(uid)) {
+                selectedStudIds.delete(uid);
+                row.classList.remove("checked");
+                row.querySelector(".sp-checkbox").innerHTML = "";
+              } else {
+                selectedStudIds.add(uid);
+                row.classList.add("checked");
+                row.querySelector(".sp-checkbox").innerHTML =
+                  '<i class="ri-check-line"></i>';
+              }
+              // Update footer count + select-all state
+              const countEl = container.querySelector(".sp-count");
+              if (countEl)
+                countEl.textContent = `${selectedStudIds.size} selected`;
+              const sa = container.querySelector("#sp-select-all");
+              if (sa) {
+                const f2 = allStudents.filter(
+                  (s) =>
+                    !spSearchTerm ||
+                    s.full_name.toLowerCase().includes(spSearchTerm) ||
+                    s.email.toLowerCase().includes(spSearchTerm),
+                );
+                sa.checked =
+                  f2.length > 0 && f2.every((s) => selectedStudIds.has(s.id));
+                sa.indeterminate =
+                  !sa.checked && f2.some((s) => selectedStudIds.has(s.id));
+              }
+            });
+          });
+
+          // Select all
+          const selectAll = container.querySelector("#sp-select-all");
+          if (selectAll) {
+            selectAll.addEventListener("change", () => {
+              const f = allStudents.filter(
+                (s) =>
+                  !spSearchTerm ||
+                  s.full_name.toLowerCase().includes(spSearchTerm) ||
+                  s.email.toLowerCase().includes(spSearchTerm),
+              );
+              if (selectAll.checked) {
+                f.forEach((s) => selectedStudIds.add(s.id));
+              } else {
+                f.forEach((s) => selectedStudIds.delete(s.id));
+              }
+              renderStudentPicker();
+            });
+          }
+
+          // Search
+          const spSearch = container.querySelector("#sp-search");
+          if (spSearch) {
+            let t;
+            spSearch.addEventListener("input", (e) => {
+              clearTimeout(t);
+              t = setTimeout(() => {
+                spSearchTerm = e.target.value.toLowerCase();
+                renderStudentPicker();
+              }, 200);
+            });
+            // Keep focus
+            spSearch.focus();
+            spSearch.setSelectionRange(
+              spSearch.value.length,
+              spSearch.value.length,
+            );
+          }
+        }
+
+        // ── Questions ──────────────────────────────────────────────────────
         let questionCount = 0;
 
         function addQuestion() {
           questionCount++;
-          const qId = `q-${questionCount}`;
           const card = document.createElement("div");
           card.className = "question-card";
-          card.dataset.qid = qId;
+          card.dataset.qid = `q-${questionCount}`;
           card.innerHTML = `
-            <div class="question-card-header">
-                Question ${questionCount}
-                <i class="ri-delete-bin-line delete-btn" title="Delete question"></i>
-            </div>
-            <div class="question-card-body">
-                <input type="text" class="question-input" placeholder="Type your question here...">
-                <div class="options-list"></div>
-                <button type="button" class="add-btn add-option-btn">
-                    <i class="ri-add-line"></i> Add Option
-                </button>
-            </div>`;
+          <div class="question-card-header">
+            Question ${questionCount}
+            <i class="ri-delete-bin-line delete-btn" title="Delete question"></i>
+          </div>
+          <div class="question-card-body">
+            <input type="text" class="question-input" placeholder="Type your question here...">
+            <div class="options-list"></div>
+            <button type="button" class="add-btn add-option-btn">
+              <i class="ri-add-line"></i> Add Option
+            </button>
+          </div>`;
 
-          // Delete question
           card.querySelector(".delete-btn").addEventListener("click", () => {
             if (document.querySelectorAll(".question-card").length === 1) {
               UI.toast("A quiz must have at least one question.", "error");
@@ -381,7 +702,6 @@
             }
           });
 
-          // Add option
           card
             .querySelector(".add-option-btn")
             .addEventListener("click", () => {
@@ -389,9 +709,7 @@
             });
 
           document.getElementById("questions-container").appendChild(card);
-
-          // Add two default options
-          addOption(card.querySelector(".options-list"), true); // first = correct
+          addOption(card.querySelector(".options-list"), true);
           addOption(card.querySelector(".options-list"), false);
         }
 
@@ -399,14 +717,15 @@
           const item = document.createElement("div");
           item.className = "option-item";
           const count = list.children.length + 1;
+          const firstAndDefault =
+            isCorrectDefault && list.children.length === 0;
           item.innerHTML = `
-            <div class="radio-btn ${isCorrectDefault && list.children.length === 0 ? "selected" : ""}"></div>
-            <input type="text" placeholder="Option ${count}" style="flex:1;">
-            <span class="correct-label" style="display:${isCorrectDefault && list.children.length === 0 ? "block" : "none"}">✓ Correct</span>
-            <i class="ri-close-line remove-option" title="Remove option"></i>`;
+          <div class="radio-btn ${firstAndDefault ? "selected" : ""}"></div>
+          <input type="text" placeholder="Option ${count}" style="flex:1;">
+          <span class="correct-label" style="display:${firstAndDefault ? "block" : "none"}">✓ Correct</span>
+          <i class="ri-close-line remove-option" title="Remove option"></i>`;
 
           item.querySelector(".radio-btn").addEventListener("click", () => {
-            // Deselect all in this list
             list
               .querySelectorAll(".radio-btn")
               .forEach((r) => r.classList.remove("selected"));
@@ -449,6 +768,9 @@
 
           if (!title) throw new Error("Quiz title is required.");
           if (!category) throw new Error("Please select a category.");
+          if (duration < 1)
+            throw new Error("Duration must be at least 1 minute.");
+          if (points < 1) throw new Error("Total points must be at least 1.");
 
           const questions = [];
           let qError = null;
@@ -457,12 +779,13 @@
             if (qError) return;
             const text = card.querySelector(".question-input").value.trim();
             if (!text) {
-              qError = `Question ${qi + 1} text is empty.`;
+              qError = `Question ${qi + 1}: question text is empty.`;
               return;
             }
 
             const options = [];
             let hasCorrect = false;
+
             card.querySelectorAll(".option-item").forEach((item, oi) => {
               const optText = item
                 .querySelector('input[type="text"]')
@@ -481,8 +804,13 @@
                 order: oi + 1,
               });
             });
+
             if (!hasCorrect) {
               qError = `Question ${qi + 1}: Please mark one correct answer.`;
+              return;
+            }
+            if (options.length < 2) {
+              qError = `Question ${qi + 1}: At least 2 options required.`;
               return;
             }
 
@@ -490,8 +818,7 @@
           });
 
           if (qError) throw new Error(qError);
-          if (questions.length === 0)
-            throw new Error("Add at least one question.");
+          if (!questions.length) throw new Error("Add at least one question.");
 
           const payload = {
             title,
@@ -499,35 +826,43 @@
             duration_mins: duration,
             total_points: points,
             questions,
+            student_ids: Array.from(selectedStudIds),
           };
           if (date) payload.scheduled_date = date;
           if (time) payload.scheduled_time = time + ":00";
           return payload;
         }
 
-        document
-          .getElementById("add-question-btn")
-          .addEventListener("click", addQuestion);
-
+        // ── Save button ───────────────────────────────────────────────────
         document
           .getElementById("save-btn")
           .addEventListener("click", async () => {
+            console.log("🔥 SAVE CLICKED");
             const btn = document.getElementById("save-btn");
             let payload;
             try {
               payload = collectPayload();
+              console.log("📦 PAYLOAD:", payload); // ✅ ADD THIS
             } catch (e) {
+              console.error("❌ VALIDATION ERROR:", e.message); // ✅ ADD THIS
               UI.toast(e.message, "error");
               return;
             }
+
             UI.setLoading(btn, true);
             try {
-              await QuizAPI.create(payload);
-              UI.toast("Quiz published successfully!");
-              setTimeout(
-                () => (window.location.href = "my-quizzes.html"),
-                1200,
+              console.log("🚀 CALLING API...");
+              const res = await QuizAPI.create(payload);
+              console.log("✅ RESPONSE:", res);
+              const enrolled = payload.student_ids?.length || 0;
+              UI.toast(
+                enrolled
+                  ? `Quiz published! ${enrolled} student(s) enrolled.`
+                  : "Quiz published! Assign students from My Quizzes.",
               );
+              setTimeout(() => {
+                window.location.href = "my-quizzes.html";
+              }, 5000);
             } catch (e) {
               UI.toast(e.message, "error");
             } finally {
@@ -535,9 +870,21 @@
             }
           });
 
-        // Init with one question
+        document
+          .getElementById("add-question-btn")
+          .addEventListener("click", addQuestion);
+
+        // ── Init ──────────────────────────────────────────────────────────
         addQuestion();
+        await loadStudentPicker();
       });
     </script>
+    <style>
+      @keyframes cqSpin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </body>
 </html>

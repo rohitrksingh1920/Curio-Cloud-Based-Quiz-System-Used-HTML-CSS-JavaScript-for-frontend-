@@ -18,9 +18,9 @@ readonly S3_BUCKET=""  # e.g. "my-curio-backups" — leave empty to skip
 #  COLOR HELPERS
 # ─────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[1;33m'; NC='\033[0m'
-success() { echo -e "${GREEN}✅  $*${NC}"; }
-error()   { echo -e "${RED}❌  $*${NC}" >&2; }
-warn()    { echo -e "${YELLOW}⚠️   $*${NC}"; }
+success() { echo -e "${GREEN}  $*${NC}"; }
+error()   { echo -e "${RED}  $*${NC}" >&2; }
+warn()    { echo -e "${YELLOW}   $*${NC}"; }
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="$BACKUP_DIR/curio_${TIMESTAMP}.sql.gz"

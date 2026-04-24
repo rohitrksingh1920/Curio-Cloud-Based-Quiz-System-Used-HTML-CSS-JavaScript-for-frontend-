@@ -14,7 +14,7 @@
     />
     <link rel="stylesheet" href="style.css" />
     <style>
-      /*  Login page specific  */
+      /* ── Login page ── */
       .error-box {
         background: #fff0f0;
         border: 1px solid #ffd0d0;
@@ -53,7 +53,7 @@
         border-radius: 8px;
       }
 
-      /*  Modal overlay  */
+      /* ── Modal overlay ── */
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -121,7 +121,7 @@
         line-height: 1.5;
       }
 
-      /*  Step progress bar  */
+      /* ── Step progress bar ── */
       .step-bar {
         display: flex;
         align-items: center;
@@ -161,7 +161,7 @@
         background: var(--success);
       }
 
-      /*  Modal steps  */
+      /* ── Modal steps ── */
       .fp-step {
         display: none;
       }
@@ -169,7 +169,7 @@
         display: block;
       }
 
-      /*  Email hint box  */
+      /* ── Email hint box ── */
       .email-hint {
         background: #eef2ff;
         border-radius: 10px;
@@ -197,7 +197,7 @@
         word-break: break-all;
       }
 
-      /*  OTP input  */
+      /* ── OTP input ── */
       .otp-input-wrap {
         position: relative;
         margin-bottom: 6px;
@@ -233,7 +233,7 @@
         color: var(--primary-hover);
       }
 
-      /*  Modal form inputs  */
+      /* ── Modal form inputs ── */
       .modal-input-group {
         margin-bottom: 16px;
       }
@@ -250,7 +250,7 @@
         border-radius: 8px;
       }
 
-      /*  Success step  */
+      /* ── Success step ── */
       .success-icon-wrap {
         text-align: center;
         padding: 16px 0 28px;
@@ -265,6 +265,7 @@
         justify-content: center;
         font-size: 36px;
         margin-bottom: 16px;
+        color: var(--success);
       }
       .success-icon-wrap h3 {
         font-size: 20px;
@@ -279,9 +280,7 @@
     </style>
   </head>
   <body class="auth-page">
-
-         <!-- LOGIN CARD -->
-
+    <!-- ── LOGIN CARD ── -->
     <div class="auth-container">
       <div class="auth-left">
         <h1>Curio Cloud Quiz</h1>
@@ -328,7 +327,6 @@
             </div>
           </div>
 
-          <!-- Forgot password link — opens modal -->
           <a href="#" class="forgot-password" id="forgot-link"
             >Forgot password?</a
           >
@@ -344,16 +342,26 @@
       </div>
     </div>
 
-         <!-- FORGOT PASSWORD MODAL  (3 steps) -->
-
-    <div class="modal-overlay" id="fp-modal">
+    <!-- ── FORGOT PASSWORD MODAL (4 steps) ── -->
+    <div
+      class="modal-overlay"
+      id="fp-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Reset Password"
+    >
       <div class="modal-box">
-        <button class="modal-close" id="fp-close" title="Close">
+        <button
+          class="modal-close"
+          id="fp-close"
+          title="Close"
+          aria-label="Close"
+        >
           <i class="ri-close-line"></i>
         </button>
 
         <!-- Step progress -->
-        <div class="step-bar">
+        <div class="step-bar" aria-hidden="true">
           <div class="step-dot active" id="fp-dot-1">1</div>
           <div class="step-line" id="fp-line-1"></div>
           <div class="step-dot" id="fp-dot-2">2</div>
@@ -361,19 +369,17 @@
           <div class="step-dot" id="fp-dot-3">3</div>
         </div>
 
-        <!-- ── Step 1: Enter email ── -->
+        <!-- Step 1: Enter email -->
         <div class="fp-step active" id="fp-step-1">
           <div class="modal-title">Reset Password</div>
           <div class="modal-subtitle">
             Enter the email address you registered with. We'll send you a
             6-digit verification code.
           </div>
-
           <div class="error-box" id="fp-err-1">
             <i class="ri-error-warning-line"></i
             ><span id="fp-err-1-text"></span>
           </div>
-
           <div class="modal-input-group">
             <label for="fp-email">Registered Email Address</label>
             <input
@@ -383,7 +389,6 @@
               autocomplete="username"
             />
           </div>
-
           <button
             type="button"
             id="fp-send-btn"
@@ -395,27 +400,23 @@
           </button>
         </div>
 
-        <!-- ── Step 2: Enter OTP ── -->
+        <!-- Step 2: Enter OTP -->
         <div class="fp-step" id="fp-step-2">
           <div class="modal-title">Enter Verification Code</div>
           <div class="modal-subtitle">
             We sent a 6-digit code to your email. Enter it below.
           </div>
-
           <div class="error-box" id="fp-err-2">
             <i class="ri-error-warning-line"></i
             ><span id="fp-err-2-text"></span>
           </div>
-
-          <!-- Shows which email the OTP was sent to -->
-          <div class="email-hint" id="fp-email-hint">
+          <div class="email-hint">
             <i class="ri-mail-check-line"></i>
             <div>
               <div class="lbl">Code sent to</div>
               <div class="val" id="fp-hint-email">—</div>
             </div>
           </div>
-
           <div class="modal-input-group">
             <label for="fp-otp-input">6-Digit Code</label>
             <div class="otp-input-wrap">
@@ -425,16 +426,18 @@
                 maxlength="6"
                 placeholder="• • • • • •"
                 inputmode="numeric"
+                autocomplete="one-time-code"
               />
             </div>
+            <!-- Timer rendered here by JS — resend button appended dynamically -->
             <div class="otp-timer" id="fp-timer">
-              Expires in <strong id="fp-countdown">10:00</strong> &nbsp;·&nbsp;
+              Expires in <strong id="fp-countdown">10:00</strong>
+              &nbsp;·&nbsp;
               <button class="resend-link" id="fp-resend-btn" type="button">
                 Resend code
               </button>
             </div>
           </div>
-
           <button
             type="button"
             id="fp-verify-btn"
@@ -446,18 +449,16 @@
           </button>
         </div>
 
-        <!--  Step 3: New password  -->
+        <!-- Step 3: New password -->
         <div class="fp-step" id="fp-step-3">
           <div class="modal-title">Set New Password</div>
           <div class="modal-subtitle">
             Code verified! Choose a strong new password (minimum 8 characters).
           </div>
-
           <div class="error-box" id="fp-err-3">
             <i class="ri-error-warning-line"></i
             ><span id="fp-err-3-text"></span>
           </div>
-
           <div class="modal-input-group">
             <label for="fp-new-pass">New Password</label>
             <input
@@ -476,7 +477,6 @@
               autocomplete="new-password"
             />
           </div>
-
           <button
             type="button"
             id="fp-save-btn"
@@ -488,10 +488,10 @@
           </button>
         </div>
 
-        <!-- ── Step 4: Success ── -->
+        <!-- Step 4: Success -->
         <div class="fp-step" id="fp-step-4">
           <div class="success-icon-wrap">
-            <div class="icon-circle"></div>
+            <div class="icon-circle"><i class="ri-check-line"></i></div>
             <h3>Password Reset!</h3>
             <p>
               Your password has been changed successfully.<br />You can now log
@@ -509,22 +509,24 @@
           </button>
         </div>
       </div>
-      <!-- /.modal-box -->
     </div>
-    <!-- /.modal-overlay -->
 
     <script src="api.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        Auth.redirectIfLoggedIn();
+      // Redirect immediately if already logged in (before DOMContentLoaded)
+      if (localStorage.getItem("cq_token")) {
+        window.location.href = "dashboard.html";
+      }
 
-        /*  LOGIN  */
+      document.addEventListener("DOMContentLoaded", () => {
+        // ── Elements ─────────────────────────────────────────────────────────
         const loginBtn = document.getElementById("login-btn");
         const emailEl = document.getElementById("login-email");
         const passEl = document.getElementById("login-password");
         const errorBox = document.getElementById("login-error");
         const errorText = document.getElementById("login-error-text");
 
+        // ── Login helpers ─────────────────────────────────────────────────────
         function showLoginErr(msg) {
           errorText.textContent = msg;
           errorBox.classList.add("show");
@@ -533,12 +535,26 @@
           errorBox.classList.remove("show");
         }
 
+        // ── Login handler ─────────────────────────────────────────────────────
         async function doLogin() {
           hideLoginErr();
           const email = emailEl.value.trim();
           const pass = passEl.value;
-          if (!email || !pass) {
-            showLoginErr("Please enter your email and password.");
+
+          // Client-side validation
+          if (!email) {
+            showLoginErr("Please enter your email address.");
+            emailEl.focus();
+            return;
+          }
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showLoginErr("Please enter a valid email address.");
+            emailEl.focus();
+            return;
+          }
+          if (!pass) {
+            showLoginErr("Please enter your password.");
+            passEl.focus();
             return;
           }
 
@@ -563,16 +579,18 @@
           if (e.key === "Enter") doLogin();
         });
 
-        /*  FORGOT PASSWORD MODAL  */
+        // ── Forgot Password Modal ─────────────────────────────────────────────
         const modal = document.getElementById("fp-modal");
         const fpClose = document.getElementById("fp-close");
-        let fpEmail = ""; // stores email between steps
-        let otpTimer = null; // interval handle
+        let fpEmail = "";
+        let otpTimer = null;
 
-        //  helpers 
         function openModal() {
           modal.classList.add("open");
           goToStep(1);
+          // Pre-fill email if user typed it
+          const typed = emailEl.value.trim();
+          if (typed) document.getElementById("fp-email").value = typed;
         }
         function closeModal() {
           modal.classList.remove("open");
@@ -580,18 +598,19 @@
         }
 
         function goToStep(n) {
-          // show correct step
           [1, 2, 3, 4].forEach((i) => {
             const s = document.getElementById(`fp-step-${i}`);
             if (s) s.classList.toggle("active", i === n);
           });
-          // update dots and lines
           [1, 2, 3].forEach((i) => {
             const dot = document.getElementById(`fp-dot-${i}`);
             const line = document.getElementById(`fp-line-${i}`);
-            dot.className =
-              "step-dot" + (i < n ? " done" : i === n ? " active" : "");
-            dot.innerHTML = i < n ? '<i class="ri-check-line"></i>' : String(i);
+            if (dot) {
+              dot.className =
+                "step-dot" + (i < n ? " done" : i === n ? " active" : "");
+              dot.innerHTML =
+                i < n ? '<i class="ri-check-line"></i>' : String(i);
+            }
             if (line) line.className = "step-line" + (i < n ? " done" : "");
           });
         }
@@ -599,9 +618,10 @@
         function showFpErr(step, msg) {
           const box = document.getElementById(`fp-err-${step}`);
           const txt = document.getElementById(`fp-err-${step}-text`);
-          if (!box || !txt) return;
-          txt.textContent = msg;
-          box.classList.add("show");
+          if (box && txt) {
+            txt.textContent = msg;
+            box.classList.add("show");
+          }
         }
         function hideFpErr(step) {
           const box = document.getElementById(`fp-err-${step}`);
@@ -613,33 +633,49 @@
           let rem = minutes * 60;
           const cd = document.getElementById("fp-countdown");
           const tm = document.getElementById("fp-timer");
+          if (!cd || !tm) return;
           tm.classList.remove("expired");
 
+          // Restore original timer HTML if countdown was previously expired
+          if (!document.getElementById("fp-countdown")) {
+            tm.innerHTML =
+              'Expires in <strong id="fp-countdown">10:00</strong>&nbsp;·&nbsp;<button class="resend-link" id="fp-resend-btn" type="button">Resend code</button>';
+            document
+              .getElementById("fp-resend-btn")
+              .addEventListener("click", doSendOtp);
+          }
+
           function tick() {
+            const cdown = document.getElementById("fp-countdown");
+            if (!cdown) {
+              clearInterval(otpTimer);
+              return;
+            }
             const m = String(Math.floor(rem / 60)).padStart(2, "0");
             const s = String(rem % 60).padStart(2, "0");
-            cd.textContent = `${m}:${s}`;
+            cdown.textContent = `${m}:${s}`;
             if (rem-- <= 0) {
               clearInterval(otpTimer);
               tm.classList.add("expired");
               tm.innerHTML =
-                '<strong>Code expired.</strong> &nbsp;·&nbsp; <button class="resend-link" id="fp-resend-btn" type="button">Resend code</button>';
-              // re-attach listener after innerHTML swap
-              document
-                .getElementById("fp-resend-btn")
-                .addEventListener("click", doSendOtp);
+                '<strong>Code expired.</strong>&nbsp;·&nbsp;<button class="resend-link" id="fp-resend-btn" type="button">Resend code</button>';
+              // Re-attach after innerHTML swap
+              const rb = document.getElementById("fp-resend-btn");
+              if (rb) rb.addEventListener("click", doSendOtp);
             }
           }
           tick();
           otpTimer = setInterval(tick, 1000);
         }
 
-        //  Step 1: send OTP 
+        // ── Step 1: Send OTP ──────────────────────────────────────────────────
         async function doSendOtp() {
           hideFpErr(1);
-          const email = (document.getElementById("fp-email")?.value || fpEmail)
+          const emailInput = document.getElementById("fp-email");
+          const email = (emailInput ? emailInput.value : fpEmail)
             .trim()
             .toLowerCase();
+
           if (!email) {
             showFpErr(1, "Please enter your email address.");
             return;
@@ -656,8 +692,10 @@
           try {
             await ForgotPasswordAPI.sendOtp(email);
             fpEmail = email;
-            document.getElementById("fp-hint-email").textContent = email;
-            document.getElementById("fp-otp-input").value = "";
+            const hint = document.getElementById("fp-hint-email");
+            if (hint) hint.textContent = email;
+            const otpIn = document.getElementById("fp-otp-input");
+            if (otpIn) otpIn.value = "";
             goToStep(2);
             startCountdown(10);
             UI.toast("Verification code sent to your email!");
@@ -672,32 +710,42 @@
           }
         }
 
-        //  Step 2: verify OTP 
-        async function doVerifyOtp() {
+        // ── Step 2: Verify OTP (client-side format check only) ───────────────
+        function doVerifyOtp() {
           hideFpErr(2);
-          const otp = document.getElementById("fp-otp-input").value.trim();
+          const otpIn = document.getElementById("fp-otp-input");
+          const otp = otpIn ? otpIn.value.trim() : "";
           if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
             showFpErr(2, "Please enter the 6-digit code from your email.");
             return;
           }
-          // Just move to step 3 — OTP is verified server-side when saving password
           clearInterval(otpTimer);
           goToStep(3);
+          // Focus first password field
+          setTimeout(() => {
+            const p = document.getElementById("fp-new-pass");
+            if (p) p.focus();
+          }, 100);
         }
 
-        //  Step 3: save new password 
+        // ── Step 3: Save new password ─────────────────────────────────────────
         async function doSavePassword() {
           hideFpErr(3);
-          const otp = document.getElementById("fp-otp-input").value.trim();
-          const newPw = document.getElementById("fp-new-pass").value;
-          const confPw = document.getElementById("fp-confirm-pass").value;
+          const otpIn = document.getElementById("fp-otp-input");
+          const newPassEl = document.getElementById("fp-new-pass");
+          const confPassEl = document.getElementById("fp-confirm-pass");
+          const otp = otpIn ? otpIn.value.trim() : "";
+          const newPw = newPassEl ? newPassEl.value : "";
+          const confPw = confPassEl ? confPassEl.value : "";
 
           if (!newPw || newPw.length < 8) {
             showFpErr(3, "Password must be at least 8 characters.");
+            if (newPassEl) newPassEl.focus();
             return;
           }
           if (newPw !== confPw) {
             showFpErr(3, "Passwords do not match.");
+            if (confPassEl) confPassEl.focus();
             return;
           }
 
@@ -707,9 +755,10 @@
             await ForgotPasswordAPI.resetPassword(fpEmail, otp, newPw, confPw);
             goToStep(4);
           } catch (e) {
-            const msg = e.message || "Failed to reset password.";
+            const msg =
+              e.message || "Failed to reset password. Please try again.";
             showFpErr(3, msg);
-            // If the error is about the OTP, go back to step 2
+            // If OTP-related error, send user back to step 2
             if (
               msg.toLowerCase().includes("otp") ||
               msg.toLowerCase().includes("code") ||
@@ -722,21 +771,20 @@
           }
         }
 
-        //  Event bindings 
+        // ── Event bindings ────────────────────────────────────────────────────
         document
           .getElementById("forgot-link")
           .addEventListener("click", (e) => {
             e.preventDefault();
-            // Pre-fill email from login form if user already typed it
-            const loginEmail = emailEl.value.trim();
-            const fpEmailInput = document.getElementById("fp-email");
-            if (loginEmail) fpEmailInput.value = loginEmail;
             openModal();
           });
-
         fpClose.addEventListener("click", closeModal);
         modal.addEventListener("click", (e) => {
           if (e.target === modal) closeModal();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && modal.classList.contains("open"))
+            closeModal();
         });
 
         document
@@ -754,6 +802,8 @@
           .addEventListener("keydown", (e) => {
             if (e.key === "Enter") doVerifyOtp();
           });
+
+        // fp-resend-btn is already in DOM — attach directly (no dynamic innerHTML here)
         document
           .getElementById("fp-resend-btn")
           .addEventListener("click", doSendOtp);
@@ -769,17 +819,17 @@
 
         document.getElementById("fp-done-btn").addEventListener("click", () => {
           closeModal();
-          // Pre-fill the login email with the reset email
           emailEl.value = fpEmail;
           passEl.value = "";
           passEl.focus();
         });
 
-        // Close modal with Escape key
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && modal.classList.contains("open"))
-            closeModal();
-        });
+        // Auto-allow only digits in OTP input
+        document
+          .getElementById("fp-otp-input")
+          .addEventListener("input", (e) => {
+            e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6);
+          });
       });
     </script>
   </body>

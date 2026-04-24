@@ -1,125 +1,4 @@
 
-# import logging
-# import sys
-# import os
-# from contextlib import asynccontextmanager
-
-# from fastapi import FastAPI, Request
-# from fastapi.middleware.cors import CORSMiddleware
-# from fastapi.responses import JSONResponse
-# from fastapi.staticfiles import StaticFiles
-
-# from backend.app.core.config import settings
-# from backend.app.core.database import Base, engine, check_db_connection
-
-# #  Register all models so SQLAlchemy creates tables 
-# from backend.app.models.user import User                                
-# from backend.app.models.quiz import Quiz, Question, QuestionOption      
-# from backend.app.models.attempt import QuizAttempt, AttemptAnswer       
-# from backend.app.models.notification import Notification                
-
-# #  Routers  #
-# from backend.app.routers import auth, dashboard, quiz, analytics
-# from backend.app.routers import settings as settings_router
-# from backend.app.routers import notifications
-# from backend.app.routers import leaderboard          
-
-# #  Create static/avatars directory before StaticFiles is mounted 
-# # Must exist before the app starts — StaticFiles will crash if dir is missing.
-# _STATIC_DIR  = os.path.join(os.getcwd(), "static")
-# _AVATARS_DIR = os.path.join(_STATIC_DIR, "avatars")
-# os.makedirs(_AVATARS_DIR, exist_ok=True)
-
-# #  Logging 
-# logging.basicConfig(
-#     level=logging.DEBUG if settings.DEBUG else logging.INFO,
-#     format="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
-#     datefmt="%Y-%m-%d %H:%M:%S",
-#     stream=sys.stdout,
-# )
-# logger = logging.getLogger(__name__)
-
-
-# #  Lifespan  #
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION} [{settings.ENVIRONMENT}]")
-#     check_db_connection()
-#     Base.metadata.create_all(bind=engine)
-#     logger.info("Startup complete.")
-#     yield
-#     logger.info("Shutting down.")
-
-
-# #  App  #
-# app = FastAPI(
-#     title=settings.APP_NAME,
-#     version=settings.APP_VERSION,
-#     docs_url="/docs"  if settings.DEBUG else None,
-#     redoc_url="/redoc" if settings.DEBUG else None,
-#     lifespan=lifespan,
-# )
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=settings.FRONTEND_ORIGINS,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-
-# @app.middleware("http")
-# async def log_requests(request: Request, call_next):
-#     response = await call_next(request)
-#     return response
-
-
-# #  API Routers (ALL registered before any static mounts)  
-# app.include_router(auth.router)
-# app.include_router(dashboard.router)
-# app.include_router(quiz.router)
-# app.include_router(analytics.router)
-# app.include_router(settings_router.router)
-# app.include_router(notifications.router)
-# app.include_router(leaderboard.router)      
-
-# #  Static files: uploaded avatars (/static/avatars/<uuid>.jpg)  
-# # Must come AFTER all API routers and BEFORE the catch-all frontend mount.
-# app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
-
-# #  Frontend catch-all (MUST be last)  
-# _frontend_dir = os.path.join(os.getcwd(), "frontend")
-# if os.path.isdir(_frontend_dir):
-#     app.mount("/", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
-#     logger.info(f"Serving frontend from {os.path.abspath(_frontend_dir)}")
-
-
-# #  Health 
-# @app.get("/health", include_in_schema=False)
-# def health():
-#     return {"status": "ok", "app": settings.APP_NAME, "env": settings.ENVIRONMENT}
-
-
-# #  Global error handler 
-# @app.exception_handler(Exception)
-# async def generic_exception_handler(request: Request, exc: Exception):
-#     logger.exception(f"Unhandled error on {request.url.path}: {exc}")
-#     return JSONResponse(
-#         status_code=500,
-#         content={"detail": "An unexpected server error occurred."},
-#     )
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -134,22 +13,23 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.openapi.utils import get_openapi
 
 from backend.app.core.config import settings
 from backend.app.core.database import Base, engine, check_db_connection
 
-# Register all models
-from backend.app.models.user import User                                # noqa
-from backend.app.models.quiz import Quiz, Question, QuestionOption, QuizEnrollment  # noqa
-from backend.app.models.attempt import QuizAttempt, AttemptAnswer       # noqa
-from backend.app.models.notification import Notification                # noqa
+# ── Register ALL models before create_all() ──────────────────────────────────
+from backend.app.models.user import User                                        
+from backend.app.models.quiz import Quiz, Question, QuestionOption, QuizEnrollment  
+from backend.app.models.attempt import QuizAttempt, AttemptAnswer               
+from backend.app.models.notification import Notification                        
 
-# Routers
+# ── Routers ───────────────────────────────────────────────────────────────────
 from backend.app.routers import auth, dashboard, quiz, analytics
 from backend.app.routers import settings as settings_router
-from backend.app.routers import notifications, leaderboard
-from backend.app.routers import admin                                   # ← NEW
+from backend.app.routers import notifications, leaderboard, admin
 
+# ── Ensure static directories exist on startup ───────────────────────────────
 _STATIC_DIR  = os.path.join(os.getcwd(), "static")
 _AVATARS_DIR = os.path.join(_STATIC_DIR, "avatars")
 os.makedirs(_AVATARS_DIR, exist_ok=True)
@@ -164,10 +44,16 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info(f"Starting {settings.APP_NAME} [{settings.ENVIRONMENT}]")
-    check_db_connection()
-    Base.metadata.create_all(bind=engine)
-    logger.info("Startup complete.")
+    logger.info(
+        f"Starting {settings.APP_NAME} v{settings.APP_VERSION} [{settings.ENVIRONMENT}]"
+    )
+    try:
+        check_db_connection()
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables verified. Startup complete.")
+    except Exception as exc:
+        logger.critical(f"Startup failed: {exc}")
+        raise
     yield
     logger.info("Shutting down.")
 
@@ -175,50 +61,104 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    docs_url="/docs"  if settings.DEBUG else None,
-    redoc_url="/redoc" if settings.DEBUG else None,
+    description="Curio — Cloud Quiz Platform API",
+    # Always expose docs; DEBUG flag controls it via settings but keep it on for now
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
     lifespan=lifespan,
 )
 
+# ── CORS ─────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Length", "X-Request-ID"],
 )
 
 
+# ── Request logger ────────────────────────────────────────────────────────────
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+    except Exception as exc:
+        logger.exception(f"Unhandled middleware error: {exc}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "An unexpected server error occurred. Please try again."},
+        )
+    logger.debug(f"{request.method} {request.url.path} → {response.status_code}")
     return response
 
 
-# ── API routers (before any static mounts) ───────────────────────────────────
-app.include_router(auth.router)
-app.include_router(dashboard.router)
-app.include_router(quiz.router)
-app.include_router(analytics.router)
-app.include_router(settings_router.router)
-app.include_router(notifications.router)
-app.include_router(leaderboard.router)
-app.include_router(admin.router)                                        # ← NEW
+# ── API routers — MUST come before StaticFiles mounts ────────────────────────
+app.include_router(auth.router,             prefix="/api/auth",          tags=["Auth"])
+app.include_router(dashboard.router,        prefix="/api/dashboard",     tags=["Dashboard"])
+app.include_router(quiz.router,             prefix="/api/quizzes",       tags=["Quizzes"])
+app.include_router(analytics.router,        prefix="/api/analytics",     tags=["Analytics"])
+app.include_router(settings_router.router,  prefix="/api/settings",      tags=["Settings"])
+app.include_router(notifications.router,    prefix="/api/notifications", tags=["Notifications"])
+app.include_router(leaderboard.router,      prefix="/api/leaderboard",   tags=["Leaderboard"])
+app.include_router(admin.router,            prefix="/api/admin",         tags=["Admin"])
 
-# ── Static files ─────────────────────────────────────────────────────────────
+# ── Static files (avatars uploaded by users) ─────────────────────────────────
 app.mount("/static", StaticFiles(directory=_STATIC_DIR), name="static")
 
-_frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
-if os.path.isdir(_frontend_dir):
-    app.mount("/", StaticFiles(directory=_frontend_dir, html=True), name="frontend")
 
-
+# ── Health endpoint ───────────────────────────────────────────────────────────
 @app.get("/health", include_in_schema=False)
 def health():
-    return {"status": "ok", "app": settings.APP_NAME}
+    return {
+        "status": "ok",
+        "app": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "environment": settings.ENVIRONMENT,
+    }
 
 
+# ── Global exception handler ──────────────────────────────────────────────────
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
-    logger.exception(f"Unhandled error on {request.url.path}: {exc}")
-    return JSONResponse(status_code=500, content={"detail": "An unexpected server error occurred."})
+    logger.exception(f"Unhandled error on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected server error occurred. Please try again."},
+    )
+
+
+# ── Custom OpenAPI schema with Bearer auth ────────────────────────────────────
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    schema.setdefault("components", {})
+    schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Enter your JWT token (obtained from /api/auth/login)",
+        }
+    }
+    # Apply BearerAuth to every operation
+    for path_item in schema.get("paths", {}).values():
+        for operation in path_item.values():
+            if isinstance(operation, dict):
+                operation.setdefault("security", [{"BearerAuth": []}])
+
+    app.openapi_schema = schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
